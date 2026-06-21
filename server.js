@@ -1,9 +1,9 @@
+import 'dotenv/config';
 import express from 'express';
 import OpenAI from 'openai';
 import * as cheerio from 'cheerio';
 import mammoth from 'mammoth';
 import multer from 'multer';
-import Database from 'better-sqlite3';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import fs from 'fs';
@@ -28,17 +28,51 @@ const MODEL = process.env.OPENAI_MODEL || 'gpt-4o';
 // ---- Optional team password gate ----
 const TEAM_PASSWORD = process.env.TEAM_PASSWORD || '';
 
-// ---- Database for shared reports ----
-const dbPath = process.env.DB_PATH || join(__dirname, 'reports.db');
-const db = new Database(dbPath);
-db.exec(`
-  CREATE TABLE IF NOT EXISTS reports (
-    id TEXT PRIMARY KEY,
-    name TEXT NOT NULL,
-    data TEXT NOT NULL,
-    updated_at TEXT NOT NULL
-  )
-`);
+// ---- Storage for shared reports ----
+// Production (Vercel/any serverless): set TURSO_DATABASE_URL (+ TURSO_AUTH_TOKEN) for a
+// real shared, persistent SQLite-compatible DB. Without it, falls back to in-memory
+// storage — fine for local dev, but NOT persistent or shared across serverless instances.
+async function createStore() {
+  if (process.env.TURSO_DATABASE_URL) {
+    const { createClient } = await import('@libsql/client/web');
+    const client = createClient({
+      url: process.env.TURSO_DATABASE_URL,
+      authToken: process.env.TURSO_AUTH_TOKEN
+    });
+    await client.execute(`CREATE TABLE IF NOT EXISTS reports (
+      id TEXT PRIMARY KEY, name TEXT NOT NULL, data TEXT NOT NULL, updated_at TEXT NOT NULL
+    )`);
+    return {
+      async all() {
+        const r = await client.execute('SELECT id, name, data, updated_at FROM reports ORDER BY updated_at DESC');
+        return r.rows;
+      },
+      async get(id) {
+        const r = await client.execute({ sql: 'SELECT data FROM reports WHERE id = ?', args: [id] });
+        return r.rows[0] || null;
+      },
+      async upsert(id, name, data, updated_at) {
+        await client.execute({
+          sql: `INSERT INTO reports (id, name, data, updated_at) VALUES (?, ?, ?, ?)
+                ON CONFLICT(id) DO UPDATE SET name=excluded.name, data=excluded.data, updated_at=excluded.updated_at`,
+          args: [id, name, data, updated_at]
+        });
+      },
+      async del(id) {
+        await client.execute({ sql: 'DELETE FROM reports WHERE id = ?', args: [id] });
+      }
+    };
+  }
+  console.warn('No TURSO_DATABASE_URL set — using in-memory report storage (not persistent, not shared across instances).');
+  const mem = new Map();
+  return {
+    async all() { return [...mem.values()].sort((a, b) => b.updated_at.localeCompare(a.updated_at)); },
+    async get(id) { return mem.get(id) || null; },
+    async upsert(id, name, data, updated_at) { mem.set(id, { id, name, data, updated_at }); },
+    async del(id) { mem.delete(id); }
+  };
+}
+const store = await createStore();
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.static(join(__dirname, 'public')));
@@ -278,31 +312,37 @@ app.post('/api/review', checkAuth, async (req, res) => {
 });
 
 // ---- Shared report storage (visible to whole team) ----
-app.get('/api/reports', checkAuth, (req, res) => {
-  const rows = db.prepare('SELECT id, name, data, updated_at FROM reports ORDER BY updated_at DESC').all();
+app.get('/api/reports', checkAuth, async (req, res) => {
+  const rows = await store.all();
   res.json(rows.map(r => ({ id: r.id, name: r.name, updated_at: r.updated_at, ...JSON.parse(r.data) })));
 });
 
-app.get('/api/reports/:id', checkAuth, (req, res) => {
-  const row = db.prepare('SELECT data FROM reports WHERE id = ?').get(req.params.id);
+app.get('/api/reports/:id', checkAuth, async (req, res) => {
+  const row = await store.get(req.params.id);
   if (!row) return res.status(404).json({ error: 'Not found' });
   res.json(JSON.parse(row.data));
 });
 
-app.put('/api/reports/:id', checkAuth, (req, res) => {
+app.put('/api/reports/:id', checkAuth, async (req, res) => {
   const { name, data } = req.body;
-  db.prepare('INSERT INTO reports (id, name, data, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET name=excluded.name, data=excluded.data, updated_at=excluded.updated_at')
-    .run(req.params.id, name, JSON.stringify(data), new Date().toISOString());
+  await store.upsert(req.params.id, name, JSON.stringify(data), new Date().toISOString());
   res.json({ ok: true });
 });
 
-app.delete('/api/reports/:id', checkAuth, (req, res) => {
-  db.prepare('DELETE FROM reports WHERE id = ?').run(req.params.id);
+app.delete('/api/reports/:id', checkAuth, async (req, res) => {
+  await store.del(req.params.id);
   res.json({ ok: true });
 });
 
-app.listen(PORT, () => {
-  console.log(`Spark QA app running on port ${PORT}`);
-  console.log(`API key configured: ${!!API_KEY}`);
-  console.log(`Team password protection: ${!!TEAM_PASSWORD}`);
-});
+// On Vercel (and other serverless platforms) the app is exported as a handler instead of
+// binding a port. Locally, start a normal HTTP server.
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Spark QA app running on port ${PORT}`);
+    console.log(`API key configured: ${!!API_KEY}`);
+    console.log(`Team password protection: ${!!TEAM_PASSWORD}`);
+  });
+}
+
+// Export the Express app so Vercel (api/index.js) can use it as a serverless handler.
+export default app;
