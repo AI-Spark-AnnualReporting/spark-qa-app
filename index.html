@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spark QA</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+:root{--bg1:#fff;--bg2:#f5f5f4;--bg3:#eeede8;--t1:#1a1a1a;--t2:#555;--t3:#999;--b1:rgba(0,0,0,0.35);--b2:rgba(0,0,0,0.22);--b3:rgba(0,0,0,0.12);--r1:8px;--r2:12px;--f:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+@media(prefers-color-scheme:dark){:root{--bg1:#1c1c1a;--bg2:#252523;--bg3:#2e2e2b;--t1:#f0efeb;--t2:#aaa;--t3:#666;--b1:rgba(255,255,255,0.3);--b2:rgba(255,255,255,0.18);--b3:rgba(255,255,255,0.1)}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--f);background:var(--bg3);min-height:100vh;padding:2rem 1rem;color:var(--t1)}
+.wrap{max-width:820px;margin:0 auto;background:var(--bg1);border-radius:var(--r2);padding:2rem;border:.5px solid var(--b3)}
+h1{font-size:18px;font-weight:500}h2{font-size:15px;font-weight:500}
+.sub{font-size:13px;color:var(--t2);margin-top:3px}
+.hdr{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:1.5rem}
+.sv-b{font-size:11px;color:var(--t3);display:flex;align-items:center;gap:4px}
+.btn{font-size:12px;padding:6px 12px;border:.5px solid var(--b2);border-radius:var(--r1);background:none;cursor:pointer;color:var(--t2);font-family:var(--f);display:inline-flex;align-items:center;gap:5px}
+.btn:hover{color:var(--t1);border-color:var(--b1)}
+.run-btn{background:var(--t1);color:var(--bg1);border-color:var(--t1);font-size:14px;font-weight:500;padding:11px;width:100%;justify-content:center;margin-top:.5rem}
+.run-btn:hover{opacity:.88;color:var(--bg1)}.run-btn:disabled{opacity:.35;cursor:not-allowed}
+.sdiv{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);border-top:.5px solid var(--b3);padding-top:1rem;margin:1.25rem 0 .75rem}
+.lbl{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--t3);display:block;margin-bottom:5px}
+input,textarea,select{width:100%;font-family:var(--f);font-size:13px;color:var(--t1);background:var(--bg1);border:.5px solid var(--b3);border-radius:var(--r1);padding:9px 11px;resize:vertical}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--b1)}
+.field{margin-bottom:.9rem}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.slot{border:.5px solid var(--b3);border-radius:var(--r2);padding:1rem 1.25rem;background:var(--bg2)}
+.slot-title{font-size:13px;font-weight:500;margin-bottom:.75rem;display:flex;align-items:center;gap:7px}
+.uz-label{display:block;border:.5px dashed var(--b2);border-radius:var(--r1);padding:1.25rem 1rem;text-align:center;cursor:pointer;background:var(--bg1);margin-top:.5rem;transition:border-color .15s}
+.uz-label:hover,.uz-label.got{border-style:solid;border-color:var(--b1);background:var(--bg2)}
+.uz-label i{font-size:22px;color:var(--t3);display:block;margin-bottom:6px;pointer-events:none}
+.uz-label.got i{color:var(--t1)}
+.uz-name{font-size:13px;color:var(--t2);pointer-events:none}.uz-label.got .uz-name{color:var(--t1);font-weight:500}
+.uz-sub{font-size:11px;color:var(--t3);margin-top:3px;pointer-events:none}
+.uz-label input[type=file]{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.mbt{font-size:12px;padding:4px 11px;border:.5px solid var(--b3);border-radius:20px;cursor:pointer;font-family:var(--f);color:var(--t2);background:none}
+.mbt.on{background:var(--t1);color:var(--bg1);border-color:var(--t1)}
+.mode-row{display:flex;gap:6px;margin-bottom:.6rem;flex-wrap:wrap}
+.chk-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:1rem}
+.chk{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--t2);cursor:pointer}
+.chk input[type=checkbox]{accent-color:var(--t1);width:14px;height:14px;flex-shrink:0}
+.note{font-size:12px;color:var(--t3);background:var(--bg2);border-radius:var(--r1);padding:8px 12px;display:flex;align-items:flex-start;gap:6px;line-height:1.5}
+.prog-wrap{margin:1rem 0}.prog-bar{background:var(--bg2);border-radius:4px;height:3px;overflow:hidden}
+.prog-fill{height:100%;background:var(--t1);border-radius:4px;transition:width .5s ease}
+.prog-lbl{font-size:12px;color:var(--t2);margin-top:6px;text-align:center}
+.score-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1.25rem}
+.sc{background:var(--bg2);border-radius:var(--r1);padding:12px;text-align:center}
+.sc-n{font-size:22px;font-weight:500}.sc-l{font-size:11px;color:var(--t2);margin-top:2px;text-transform:uppercase;letter-spacing:.04em}
+.red{color:#A32D2D}.amber{color:#854F0B}.grn{color:#3B6D11}
+.pills{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap}
+.pill{font-size:12px;padding:5px 13px;border:.5px solid var(--b3);border-radius:20px;cursor:pointer;color:var(--t2);background:none;font-family:var(--f)}
+.pill.on{background:var(--t1);color:var(--bg1);border-color:var(--t1)}
+.ic{border:.5px solid var(--b3);border-radius:var(--r2);padding:1rem 1.25rem;margin-bottom:8px;background:var(--bg1)}
+.ic.critical{border-left:3px solid #E24B4A}.ic.warning{border-left:3px solid #EF9F27}.ic.info{border-left:3px solid #378ADD}.ic.pass{border-left:3px solid #639922}.ic.rct{border-left:3px solid #378ADD}.ic.rpm{border-left:3px solid #639922}
+.itop{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.ititle{font-size:14px;font-weight:500}.imeta{font-size:12px;color:var(--t3);margin-top:3px}
+.badge{font-size:11px;padding:3px 9px;border-radius:20px;white-space:nowrap;flex-shrink:0}
+.bc{background:#FCEBEB;color:#A32D2D}.bw{background:#FAEEDA;color:#854F0B}.bi{background:#E6F1FB;color:#185FA5}.bp{background:#EAF3DE;color:#3B6D11}
+.ibody{font-size:13px;color:var(--t2);margin-top:9px;line-height:1.6}.ibody strong{color:var(--t1);font-weight:500}
+.epair{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.ex{font-size:12px;background:var(--bg2);border-radius:var(--r1);padding:8px 10px;line-height:1.6;color:var(--t2)}
+.ex.ar{direction:rtl;text-align:right;font-size:13px}
+.exl{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--t3);margin-bottom:4px}
+.so-area{margin-top:10px;border-top:.5px solid var(--b3);padding-top:10px}
+.so-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap}
+.so-lbl{font-size:12px;color:var(--t2);min-width:120px;display:flex;align-items:center;gap:5px;flex-shrink:0}
+.so-inp{font-size:12px;padding:5px 9px;border:.5px solid var(--b3);border-radius:var(--r1);background:var(--bg1);color:var(--t1);font-family:var(--f);width:auto;flex:1;min-width:80px}
+.so-btn{font-size:12px;padding:5px 11px;border:.5px solid var(--b2);border-radius:var(--r1);background:none;cursor:pointer;font-family:var(--f);color:var(--t2);white-space:nowrap;flex-shrink:0}
+.so-btn:hover{color:var(--t1)}
+.so-done{font-size:12px;color:#3B6D11;display:flex;align-items:center;gap:5px}
+.so-stamp{font-size:11px;color:var(--t3);margin-top:2px}
+.ps-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.ps-lbl{font-size:12px;color:var(--t2);min-width:130px}
+.ps-track{flex:1;height:6px;background:var(--b3);border-radius:3px;overflow:hidden}
+.ps-fill{height:100%;border-radius:3px;transition:width .4s ease}
+.ps-pct{font-size:12px;color:var(--t2);min-width:60px;text-align:right}
+.pm-gate{border:.5px solid var(--b3);border-radius:var(--r2);padding:1rem 1.25rem;margin-bottom:1rem;background:var(--bg2)}
+.pm-gate h3{font-size:14px;font-weight:500;margin-bottom:6px}
+.pm-gate p{font-size:13px;color:var(--t2);margin-bottom:12px;line-height:1.6}
+.pm-btn{padding:9px 18px;font-size:13px;font-weight:500;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r1);cursor:pointer;font-family:var(--f)}
+.pm-btn:hover{opacity:.88}.pm-btn:disabled{opacity:.4;cursor:not-allowed}
+.toc-hdr{display:grid;grid-template-columns:1fr 24px 1fr;gap:6px;margin-bottom:8px}
+.toc-hc{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--t3);padding:0 10px}
+.toc-hc.ar{text-align:right;direction:rtl}
+.toc-row-g{display:grid;grid-template-columns:1fr 24px 1fr;gap:6px;align-items:start;margin-bottom:5px}
+.tc{border:.5px solid var(--b3);border-radius:var(--r1);padding:7px 10px;font-size:13px;background:var(--bg1);min-height:34px}
+.tc.ar{direction:rtl;text-align:right}
+.tc.match{border-color:#639922;background:#EAF3DE;color:#3B6D11}
+.tc.mismatch{border-color:#E24B4A;background:#FCEBEB;color:#A32D2D}
+.tc.missing{border-color:#EF9F27;background:#FAEEDA;color:#854F0B;font-style:italic}
+.toc-conn{display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--t3);padding-top:8px}
+.ind1 .tc{margin-left:14px;font-size:12px}.ind1 .tc.ar{margin-left:0;margin-right:14px}
+.ind2 .tc{margin-left:28px;font-size:12px}.ind2 .tc.ar{margin-left:0;margin-right:28px}
+.legend{display:flex;gap:12px;margin-bottom:.75rem;flex-wrap:wrap}
+.ldot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.li{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--t2)}
+.sec-card{border:.5px solid var(--b3);border-radius:var(--r2);padding:1rem 1.25rem;margin-bottom:8px;background:var(--bg1)}
+.rev-panel{border:.5px solid var(--b3);border-radius:var(--r2);padding:1.25rem;background:var(--bg2);margin-bottom:1rem}
+.rev-panel h3{font-size:14px;font-weight:500;margin-bottom:.25rem;display:flex;align-items:center;gap:8px}
+.role-tag{font-size:11px;padding:2px 8px;border-radius:20px;background:var(--bg1);border:.5px solid var(--b3);color:var(--t2)}
+.rv-body{font-size:13px;color:var(--t2);line-height:1.7;margin-top:.5rem}
+.spin-row{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--t3);padding:.5rem 0}
+.spin{width:14px;height:14px;border:2px solid var(--b2);border-top-color:var(--t2);border-radius:50%;animation:sp .7s linear infinite;flex-shrink:0}
+@keyframes sp{to{transform:rotate(360deg)}}
+.saved-item{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border:.5px solid var(--b3);border-radius:var(--r1);margin-bottom:6px;background:var(--bg1);cursor:pointer;gap:10px}
+.saved-item:hover{border-color:var(--b1)}
+.si-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.si-meta{font-size:11px;color:var(--t3);margin-top:2px}
+.del-btn{font-size:11px;padding:3px 8px;border:.5px solid var(--b3);border-radius:var(--r1);background:none;cursor:pointer;color:var(--t3);font-family:var(--f);flex-shrink:0}
+.del-btn:hover{color:#A32D2D;border-color:#E24B4A}
+.empty{text-align:center;padding:2rem 1rem;color:var(--t3);font-size:13px}.empty i{font-size:28px;display:block;margin-bottom:8px}
+.chap{border:.5px solid var(--b3);border-radius:var(--r2);margin-bottom:10px;background:var(--bg1);overflow:hidden}
+.chap-head{padding:.9rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer}
+.chap-head:hover{background:var(--bg2)}
+.chap-title{font-size:14px;font-weight:500;display:flex;align-items:center;gap:8px}
+.chev{font-size:16px;color:var(--t3);transition:transform .2s}.chap.open .chev{transform:rotate(90deg)}
+.chap-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.chap-body{display:none;border-top:.5px solid var(--b3);padding:1rem 1.25rem}.chap.open .chap-body{display:block}
+.chap-summary-line{font-size:12px;color:var(--t2);margin-bottom:1rem;display:flex;gap:14px;flex-wrap:wrap}
+.chap-summary-line span{display:flex;align-items:center;gap:4px}
+.cmp-row{margin-bottom:14px;border:.5px solid var(--b3);border-radius:var(--r1);overflow:hidden}
+.cmp-row.ok{border-left:3px solid #639922}.cmp-row.diff{border-left:3px solid #E24B4A}.cmp-row.miss{border-left:3px solid #EF9F27}.cmp-row.warn{border-left:3px solid #EF9F27}
+.cmp-label{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 12px;background:var(--bg2);font-size:12px}
+.cl-name{font-weight:500;color:var(--t1)}
+.cmp-pair{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.cmp-cell{padding:9px 12px;font-size:12px;line-height:1.6;color:var(--t2)}
+.cmp-cell.src{border-right:.5px solid var(--b3)}
+.cmp-cell.ar{direction:rtl;text-align:right;font-size:13px}
+.cmp-cell-label{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--t3);margin-bottom:4px}
+.cmp-cell.missing{background:#FAEEDA;color:#854F0B;font-style:italic}
+.cmp-cell.hl{background:#FCEBEB}
+.cmp-note{font-size:12px;color:var(--t2);padding:8px 12px;background:var(--bg2);border-top:.5px solid var(--b3);line-height:1.5}
+.cmp-note strong{color:var(--t1);font-weight:500}
+.cb-bar{display:flex;align-items:center;gap:10px;padding:.75rem 1rem;background:var(--bg2);border-radius:var(--r1);margin:.75rem 0;flex-wrap:wrap}
+.cb-pill{font-size:12px;padding:4px 12px;border-radius:20px;background:#EEEDFE;color:#3C3489;border:.5px solid #AFA9EC;font-weight:500;white-space:nowrap}
+.cb-mode{font-size:12px;color:var(--t3)}
+.map-area{border:.5px solid var(--b3);border-radius:var(--r2);padding:1rem 1.25rem;background:var(--bg1);margin-top:.75rem}
+.map-area h3{font-size:13px;font-weight:500;margin-bottom:.5rem;display:flex;align-items:center;gap:6px}
+.map-row{display:grid;grid-template-columns:1fr auto 1fr auto;gap:8px;align-items:center;margin-bottom:8px}
+.map-row input{font-size:12px;padding:6px 9px}
+.map-add{font-size:12px;padding:5px 11px;border:.5px solid var(--b2);border-radius:var(--r1);background:none;cursor:pointer;color:var(--t2);font-family:var(--f);display:flex;align-items:center;gap:4px;margin-top:4px}
+.map-add:hover{color:var(--t1)}
+.map-del{font-size:11px;padding:4px 7px;border:.5px solid var(--b3);border-radius:var(--r1);background:none;cursor:pointer;color:var(--t3);font-family:var(--f)}
+.map-del:hover{color:#A32D2D;border-color:#E24B4A}
+.pw-overlay{position:fixed;inset:0;background:var(--bg3);display:flex;align-items:center;justify-content:center;z-index:1000;padding:1rem}
+.pw-card{background:var(--bg1);border:.5px solid var(--b3);border-radius:var(--r2);padding:2rem;max-width:380px;width:100%;text-align:center}
+.pw-card h2{margin-bottom:.5rem}.pw-card p{font-size:13px;color:var(--t2);margin-bottom:1.25rem}
+.fetched-note{font-size:12px;background:#EAF3DE;color:#3B6D11;border:.5px solid #639922;border-radius:var(--r1);padding:8px 12px;margin-bottom:1rem;display:flex;align-items:center;gap:6px}
+@media(max-width:600px){.two{grid-template-columns:1fr}.score-row{grid-template-columns:1fr 1fr}.epair{grid-template-columns:1fr}.map-row{grid-template-columns:1fr auto}}
+</style>
+</head>
+<body>
+
+<div id="pw-overlay" class="pw-overlay" style="display:none">
+  <div class="pw-card">
+    <h2>Spark QA</h2>
+    <p>Enter the team password to continue.</p>
+    <input type="password" id="pw-input" placeholder="Team password" style="margin-bottom:.75rem" onkeydown="if(event.key==='Enter')submitPw()">
+    <button class="btn run-btn" style="margin-top:0" onclick="submitPw()">Enter</button>
+    <p id="pw-err" style="color:#A32D2D;margin-top:.75rem;margin-bottom:0;display:none">Incorrect password</p>
+  </div>
+</div>
+
+<div class="wrap" id="app" style="display:none">
+<div class="hdr">
+  <div><h1>Spark content QA</h1><p class="sub">Bilingual structural review — PDF, Word, live websites, animated content</p></div>
+  <div style="display:flex;gap:6px;align-items:center;flex-shrink:0">
+    <div class="sv-b"><i class="ti ti-cloud"></i><span id="sv-lbl">Ready</span></div>
+    <button class="btn" onclick="showSaved()"><i class="ti ti-folder"></i> Team reports</button>
+  </div>
+</div>
+
+<div id="main-view">
+<div class="field"><label class="lbl">Project name</label><input type="text" id="proj-name" placeholder="e.g. Bank Albilad Annual Report 2024"></div>
+
+<div class="sdiv" style="border:none;padding:0;margin-top:0">Comparison setup</div>
+<div class="two">
+  <div class="slot">
+    <div class="slot-title"><i class="ti ti-file-check" style="font-size:16px"></i> Source — trusted document</div>
+    <div class="field"><label class="lbl">Language</label><select id="src-lang" onchange="updateUI()"><option value="en">English</option><option value="ar">Arabic</option></select></div>
+    <div class="field"><label class="lbl">Format</label><select id="src-fmt" onchange="updateUI()"><option value="word">Word (.docx)</option><option value="pdf">PDF</option><option value="paste">Pasted text</option></select></div>
+    <div id="src-file-area">
+      <label class="uz-label" id="lbl-src" ondragover="dD(event,'lbl-src')" ondragleave="uD('lbl-src')" ondrop="dDr(event,'src')">
+        <input type="file" id="fi-src" accept=".pdf,.docx" onchange="onFile(event,'src')">
+        <i class="ti ti-upload" id="ico-src"></i>
+        <div class="uz-name" id="nm-src">Click to upload PDF or Word</div>
+        <div class="uz-sub" id="sz-src">or drag and drop</div>
+      </label>
+    </div>
+    <div id="src-paste-area" style="display:none"><textarea id="src-paste" rows="6" placeholder="Paste source copy..."></textarea></div>
+  </div>
+  <div class="slot">
+    <div class="slot-title"><i class="ti ti-file-search" style="font-size:16px"></i> Output — file to verify</div>
+    <div class="field"><label class="lbl">Language</label><select id="out-lang" onchange="updateUI()"><option value="en">English</option><option value="ar">Arabic</option></select></div>
+    <div class="field"><label class="lbl">Format</label><select id="out-fmt" onchange="updateUI()"><option value="pdf">PDF</option><option value="website">Website / microsite</option><option value="animated">Animated banner</option><option value="paste">Pasted text</option></select></div>
+    <div id="out-pdf-area">
+      <label class="uz-label" id="lbl-out" ondragover="dD(event,'lbl-out')" ondragleave="uD('lbl-out')" ondrop="dDr(event,'out')">
+        <input type="file" id="fi-out" accept=".pdf" onchange="onFile(event,'out')">
+        <i class="ti ti-upload" id="ico-out"></i>
+        <div class="uz-name" id="nm-out">Click to upload PDF</div>
+        <div class="uz-sub" id="sz-out">or drag and drop</div>
+      </label>
+    </div>
+    <div id="out-web-area" style="display:none">
+      <div class="mode-row">
+        <button class="mbt on" id="wmbt-single" onclick="swWeb('single')">Single page</button>
+        <button class="mbt" id="wmbt-sitemap" onclick="swWeb('sitemap')">Sitemap</button>
+        <button class="mbt" id="wmbt-list" onclick="swWeb('list')">Page list</button>
+      </div>
+      <div id="wm-single"><input type="url" id="out-url" placeholder="https://example.com/ar/"></div>
+      <div id="wm-sitemap" style="display:none"><input type="url" id="out-sitemap" placeholder="https://example.com/sitemap.xml"><div class="note" style="margin-top:6px"><i class="ti ti-info-circle"></i> The server reads every page in the sitemap automatically.</div></div>
+      <div id="wm-list" style="display:none"><textarea id="out-url-list" rows="4" placeholder="One URL per line"></textarea></div>
+    </div>
+    <div id="out-anim-area" style="display:none">
+      <textarea id="out-anim" rows="5" placeholder="Paste text strings in frame order:&#10;Frame 1: ...&#10;Frame 2: ..."></textarea>
+      <div class="field" style="margin-top:.5rem"><label class="lbl">Banner URL (optional)</label><input type="url" id="out-anim-url" placeholder="https://example.com/banner/"></div>
+    </div>
+    <div id="out-paste-area" style="display:none"><textarea id="out-paste" rows="6" placeholder="Paste output copy..."></textarea></div>
+  </div>
+</div>
+
+<div class="cb-bar"><span class="cb-pill" id="cb-pill">EN PDF → AR PDF</span><span class="cb-mode" id="cb-mode">Cross-language accuracy check</span></div>
+
+<div id="mapping-wrap" style="display:none">
+  <div class="map-area">
+    <h3><i class="ti ti-link" style="font-size:14px"></i> Section-to-page mapping</h3>
+    <p style="font-size:12px;color:var(--t3);margin-bottom:.75rem;line-height:1.5">Map each document section to its microsite page. Leave blank to let the server infer it from the fetched pages.</p>
+    <div style="display:grid;grid-template-columns:1fr auto 1fr auto;gap:8px;margin-bottom:6px"><span class="lbl" style="margin:0">Document section</span><span></span><span class="lbl" style="margin:0">Microsite page URL</span><span></span></div>
+    <div id="map-rows"></div>
+    <button class="map-add" onclick="addMapRow()"><i class="ti ti-plus"></i> Add section</button>
+  </div>
+</div>
+
+<div class="sdiv">Checks to run</div>
+<div class="chk-grid">
+  <label class="chk"><input type="checkbox" id="c-toc" checked> Table of contents structure</label>
+  <label class="chk"><input type="checkbox" id="c-sec" checked> Section and chapter headings</label>
+  <label class="chk"><input type="checkbox" id="c-sub" checked> Sub-section hierarchy</label>
+  <label class="chk"><input type="checkbox" id="c-par" checked> Paragraph count and order</label>
+  <label class="chk"><input type="checkbox" id="c-tr" checked> Content accuracy</label>
+  <label class="chk"><input type="checkbox" id="c-rtl" checked> RTL direction and alignment</label>
+  <label class="chk"><input type="checkbox" id="c-mis" checked> Missing sections or content</label>
+  <label class="chk"><input type="checkbox" id="c-ph" checked> Placeholder text</label>
+  <label class="chk"><input type="checkbox" id="c-num" checked> Numbers and dates</label>
+  <label class="chk"><input type="checkbox" id="c-dia" checked> Diacritics and letter forms</label>
+</div>
+<div class="field"><label class="lbl">Context and instructions (optional)</label><textarea id="ctx" rows="2" placeholder="e.g. Brand names stay in English. Dates follow Gregorian calendar."></textarea></div>
+
+<button class="btn run-btn" id="run-btn" onclick="runQA()"><i class="ti ti-scan"></i> Run QA analysis</button>
+<div id="prog-wrap" style="display:none" class="prog-wrap"><div class="prog-bar"><div class="prog-fill" id="pf" style="width:0%"></div></div><div class="prog-lbl" id="pl">Preparing...</div></div>
+<div id="results"></div>
+</div>
+
+<div id="saved-view" style="display:none">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem"><h2>Team reports</h2><button class="btn" onclick="showMain()"><i class="ti ti-arrow-left"></i> Back</button></div>
+  <div id="saved-list"></div>
+</div>
+</div>
+
+<script>
+const S={issues:[],toc:[],secs:[],chapters:[],summary:{},signoffs:{},pmOk:false,pmName:'',pmNotes:'',pmTime:'',filter:'all',view:'chapters',webMode:'single',_src:'',_out:'',_ar:false,_dtw:false,_mode:'copy',_mapN:0,_meta:null,_pw:''};
+let CONFIG={requiresPassword:false,hasApiKey:true};
+
+async function init(){
+  try{const r=await fetch('/api/config');CONFIG=await r.json();}catch(e){}
+  if(CONFIG.requiresPassword){document.getElementById('pw-overlay').style.display='flex';}
+  else{document.getElementById('app').style.display='block';}
+  updateUI();
+}
+async function submitPw(){
+  const pw=document.getElementById('pw-input').value;
+  try{const r=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pw})});const d=await r.json();
+    if(d.ok){S._pw=pw;document.getElementById('pw-overlay').style.display='none';document.getElementById('app').style.display='block';loadSavedList();}
+    else{document.getElementById('pw-err').style.display='block';}
+  }catch(e){document.getElementById('pw-err').style.display='block';}
+}
+function authHeaders(extra){return Object.assign({'x-team-password':S._pw},extra||{});}
+
+function updateUI(){
+  const sl=document.getElementById('src-lang').value,ol=document.getElementById('out-lang').value;
+  const sf=document.getElementById('src-fmt').value,of=document.getElementById('out-fmt').value;
+  document.getElementById('src-file-area').style.display=(sf==='pdf'||sf==='word')?'block':'none';
+  document.getElementById('src-paste-area').style.display=sf==='paste'?'block':'none';
+  document.getElementById('out-pdf-area').style.display=of==='pdf'?'block':'none';
+  document.getElementById('out-web-area').style.display=of==='website'?'block':'none';
+  document.getElementById('out-anim-area').style.display=of==='animated'?'block':'none';
+  document.getElementById('out-paste-area').style.display=of==='paste'?'block':'none';
+  const showMap=(sf==='pdf'||sf==='word')&&of==='website';
+  document.getElementById('mapping-wrap').style.display=showMap?'block':'none';
+  if(showMap&&S._mapN===0){addMapRow();addMapRow();addMapRow();}
+  const ll={en:'EN',ar:'AR'},fl={pdf:'PDF',word:'Word',paste:'Text',website:'Website',animated:'Banner'};
+  document.getElementById('cb-pill').textContent=`${ll[sl]} ${fl[sf]} → ${ll[ol]} ${fl[of]}`;
+  const isCopy=sl===ol;
+  document.getElementById('cb-mode').textContent=isCopy?(showMap?'Document-to-microsite copy check (live fetch)':'Same-language copy-accuracy check — content must match exactly'):'Cross-language translation check — fidelity and completeness';
+}
+function swWeb(m){S.webMode=m;['single','sitemap','list'].forEach(id=>{document.getElementById('wm-'+id).style.display=id===m?'block':'none';document.getElementById('wmbt-'+id).classList.toggle('on',id===m);});}
+function addMapRow(){S._mapN++;const id=S._mapN;const d=document.createElement('div');d.className='map-row';d.id='mr-'+id;d.innerHTML=`<input type="text" placeholder="e.g. Chapter 3 — Financial Highlights" id="ms-${id}"><span style="color:var(--t3);font-size:13px;text-align:center">→</span><input type="url" placeholder="https://example.com/ar/financials" id="mu-${id}"><button class="map-del" onclick="document.getElementById('mr-${id}').remove()"><i class="ti ti-x"></i></button>`;document.getElementById('map-rows').appendChild(d);}
+function getMapping(){const r=[];document.querySelectorAll('#map-rows .map-row').forEach(row=>{const id=row.id.replace('mr-','');const s=document.getElementById('ms-'+id)?.value.trim();const u=document.getElementById('mu-'+id)?.value.trim();if(s||u)r.push({section:s||'',url:u||''});});return r;}
+
+let srcFile=null,outFile=null;
+function dD(e,id){e.preventDefault();document.getElementById(id).classList.add('got');}
+function uD(id){document.getElementById(id).classList.remove('got');}
+function dDr(e,side){e.preventDefault();uD(side==='src'?'lbl-src':'lbl-out');const f=e.dataTransfer.files[0];if(f)setFile(f,side);}
+function onFile(e,side){if(e.target.files[0])setFile(e.target.files[0],side);}
+function setFile(file,side){
+  if(side==='src')srcFile=file;else outFile=file;
+  document.getElementById('nm-'+side).textContent=file.name;
+  document.getElementById('sz-'+side).textContent=(file.size/1024).toFixed(0)+' KB · ready';
+  document.getElementById(side==='src'?'lbl-src':'lbl-out').classList.add('got');
+  document.getElementById('ico-'+side).className='ti ti-file-check';
+}
+
+function setP(pct,lbl){document.getElementById('pf').style.width=pct+'%';document.getElementById('pl').textContent=lbl;}
+function getChecks(){const m={toc:'table of contents — every entry must match in order and hierarchy',sec:'section and chapter headings at every level',sub:'sub-section hierarchy and nesting',par:'paragraph count and order within each section',tr:'content accuracy — translation fidelity if cross-language; exact copy match if same-language',rtl:'RTL direction and alignment',mis:'missing sections, paragraphs, callouts, captions, or data points',ph:'placeholder text or untranslated strings',num:'numbers and dates format',dia:'diacritics and Arabic letter forms'};return Object.keys(m).filter(k=>document.getElementById('c-'+k).checked).map(k=>m[k]);}
+
+async function runQA(){
+  const name=document.getElementById('proj-name').value.trim();
+  if(!name){alert('Enter a project name first.');return;}
+  const sf=document.getElementById('src-fmt').value,of=document.getElementById('out-fmt').value;
+  if((sf==='pdf'||sf==='word')&&!srcFile){alert('Upload the source file first.');return;}
+  if(sf==='paste'&&!document.getElementById('src-paste').value.trim()){alert('Paste source text.');return;}
+  if(of==='pdf'&&!outFile){alert('Upload the output PDF first.');return;}
+
+  const btn=document.getElementById('run-btn');btn.disabled=true;
+  S.signoffs={};S.pmOk=false;
+  document.getElementById('prog-wrap').style.display='block';document.getElementById('results').innerHTML='';
+  setP(10,'Uploading and fetching content...');
+
+  const payload={
+    srcLang:document.getElementById('src-lang').value,outLang:document.getElementById('out-lang').value,
+    srcFmt:sf,outFmt:of,checks:getChecks(),ctx:document.getElementById('ctx').value.trim(),
+    mapping:((sf==='pdf'||sf==='word')&&of==='website')?getMapping():[],
+    webMode:S.webMode,outUrl:document.getElementById('out-url')?.value.trim(),
+    outSitemap:document.getElementById('out-sitemap')?.value.trim(),outUrlList:document.getElementById('out-url-list')?.value.trim(),
+    outAnim:document.getElementById('out-anim')?.value.trim(),outAnimUrl:document.getElementById('out-anim-url')?.value.trim(),
+    srcPaste:document.getElementById('src-paste')?.value.trim(),outPaste:document.getElementById('out-paste')?.value.trim()
+  };
+
+  const fd=new FormData();
+  fd.append('payload',JSON.stringify(payload));
+  if(srcFile)fd.append('srcFile',srcFile);
+  if(outFile)fd.append('outFile',outFile);
+
+  setP(40,'Server is fetching pages and running AI analysis...');
+  try{
+    const resp=await fetch('/api/qa',{method:'POST',headers:authHeaders(),body:fd});
+    setP(80,'Processing results...');
+    const result=await resp.json();
+    if(result.error)throw new Error(result.error+(result.raw?' — '+result.raw:''));
+    S.issues=result.issues||[];S.toc=result.toc_comparison||[];S.secs=result.section_analysis||[];S.chapters=result.chapter_content||[];S.summary=result.summary||{};S._meta=result._meta||{};
+    S._src=S._meta.srcDesc||'';S._out=S._meta.outDesc||'';S._ar=S._meta.isAR||false;S._dtw=S._meta.isDTW||false;S._mode=S._meta.compareMode||'copy';
+    S.filter='all';S.view='issues';
+    setP(100,'Complete');await autoSave();
+    setTimeout(()=>{document.getElementById('prog-wrap').style.display='none';renderResults();},400);
+  }catch(err){document.getElementById('prog-wrap').style.display='none';document.getElementById('results').innerHTML=`<div class="ic critical" style="margin-top:1rem"><div class="itop"><div class="ititle">Error</div><span class="badge bc">Error</span></div><div class="ibody">${esc(err.message)}</div></div>`;}
+  btn.disabled=false;
+}
+
+function calcProg(){const np=S.issues.filter(i=>i.severity!=='pass');const t=np.length;if(!t)return{ct:0,total:0,pct:0};const c=np.filter(i=>S.signoffs[i.id]?.ct).length;return{ct:c,total:t,pct:Math.round(c/t*100)};}
+function allCT(){const np=S.issues.filter(i=>i.severity!=='pass');return np.length>0&&np.every(i=>S.signoffs[i.id]?.ct);}
+
+function renderResults(){
+  const sm=S.summary||{};
+  const fetchNote=S._meta?.fetchedPages?`<div class="fetched-note"><i class="ti ti-circle-check"></i> Read ${S._meta.fetchedPages.filter(p=>!p.error).length} live page(s)${S._meta.fetchedPages.some(p=>p.error)?', '+S._meta.fetchedPages.filter(p=>p.error).length+' failed':''}</div>`:'';
+  const modeNote=S._mode==='copy'?`<div class="fetched-note" style="background:#E6F1FB;color:#185FA5;border-color:#85B7EB"><i class="ti ti-equal"></i> Copy-accuracy mode — content must match the source word-for-word. Differences are flagged as errors introduced during production.</div>`:`<div class="fetched-note" style="background:#EEEDFE;color:#3C3489;border-color:#AFA9EC"><i class="ti ti-language"></i> Translation mode — checking translation fidelity and completeness.</div>`;
+  document.getElementById('results').innerHTML=`<div style="margin-top:1.5rem">
+    ${fetchNote}${modeNote}
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;gap:8px;flex-wrap:wrap">
+      <div><h2>QA report</h2><div style="font-size:12px;color:var(--t3);margin-top:2px">${esc(S._src)} → ${esc(S._out)}</div></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn" onclick="saveReport()"><i class="ti ti-device-floppy"></i> Save</button><button class="btn" onclick="doExport()"><i class="ti ti-download"></i> Export</button></div>
+    </div>
+    <div class="score-row">
+      <div class="sc"><div class="sc-n ${col(sm.structure_score)}">${sm.structure_score||0}</div><div class="sc-l">Structure</div></div>
+      <div class="sc"><div class="sc-n ${col(sm.content_score)}">${sm.content_score||0}</div><div class="sc-l">${S._mode==='copy'?'Copy match':'Content'}</div></div>
+      <div class="sc"><div class="sc-n ${col(sm.completeness_score)}">${sm.completeness_score||0}</div><div class="sc-l">Completeness</div></div>
+      <div class="sc"><div class="sc-n red">${sm.critical||0}</div><div class="sc-l">Critical</div></div>
+    </div>
+    <div id="prog-summary"></div>
+    <div class="pills">
+      <button class="pill on" id="pv-chapters" onclick="swView('chapters',this)"><i class="ti ti-layout-list"></i> Chapter content</button>
+      <button class="pill" id="pv-issues" onclick="swView('issues',this)"><i class="ti ti-alert-triangle"></i> Issues (${sm.total_issues||0})</button>
+      <button class="pill" id="pv-toc" onclick="swView('toc',this)"><i class="ti ti-list"></i> TOC / pages</button>
+      <button class="pill" id="pv-secs" onclick="swView('secs',this)"><i class="ti ti-ruler-2"></i> Sections</button>
+      <button class="pill" id="pv-signoff" onclick="swView('signoff',this)"><i class="ti ti-writing"></i> Sign-off</button>
+      <button class="pill" id="pv-review" onclick="swView('review',this)"><i class="ti ti-users"></i> Panel review</button>
+    </div>
+    <div id="v-chapters"></div><div id="v-issues" style="display:none"></div><div id="v-toc" style="display:none"></div><div id="v-secs" style="display:none"></div><div id="v-signoff" style="display:none"></div><div id="v-review" style="display:none"></div>
+  </div>`;
+  renderPS();renderChapters();renderIssues(S.issues);renderTOC(S.toc);renderSecs(S.secs);renderSignoff();
+}
+function renderPS(){const p=calcProg();const el=document.getElementById('prog-summary');if(!el)return;el.innerHTML=`<div style="background:var(--bg2);border-radius:var(--r2);padding:1rem 1.25rem;margin-bottom:1.25rem"><div style="font-size:12px;font-weight:500;margin-bottom:10px">Sign-off progress</div><div class="ps-row"><span class="ps-lbl">Content team</span><div class="ps-track"><div class="ps-fill" style="width:${p.pct}%;background:#378ADD"></div></div><span class="ps-pct">${p.ct}/${p.total}</span></div><div class="ps-row" style="margin-bottom:0"><span class="ps-lbl">Project manager</span><div class="ps-track"><div class="ps-fill" style="width:${S.pmOk?100:0}%;background:#639922"></div></div><span class="ps-pct">${S.pmOk?'Approved':'Pending'}</span></div></div>`;}
+function swView(v,btn){S.view=v;['chapters','issues','toc','secs','signoff','review'].forEach(id=>{const el=document.getElementById('v-'+id);if(el)el.style.display=id===v?'block':'none';const pb=document.getElementById('pv-'+id);if(pb)pb.classList.toggle('on',id===v);});if(v==='signoff')renderSignoff();if(v==='review')renderRev();}
+
+function renderChapters(){
+  const el=document.getElementById('v-chapters');if(!el)return;
+  if(!S.chapters||!S.chapters.length){el.innerHTML='<div class="empty"><i class="ti ti-layout-list"></i>No chapter-level content breakdown was returned for this comparison.</div>';return;}
+  el.innerHTML=`<div style="font-size:13px;color:var(--t2);margin-bottom:1rem;line-height:1.6">Each chapter expands to show its content compared element by element against the source. ${S._mode==='copy'?'Differences are copy errors that must match the source.':'Differences are translation issues.'}</div>`+S.chapters.map((ch,ci)=>{
+    const stB={diff:'<span class="badge bc">Content issues</span>',warn:'<span class="badge bw">Needs review</span>',ok:'<span class="badge bp">Clean</span>'}[ch.status]||'';
+    return `<div class="chap${ci===0?' open':''}" id="chap-${ci}"><div class="chap-head" onclick="document.getElementById('chap-${ci}').classList.toggle('open')"><div class="chap-title"><i class="ti ti-chevron-right chev"></i> ${esc(ch.chapter_id||'')} — ${esc(ch.chapter_title||'')}</div><div class="chap-meta"><span class="badge bi">${ch.matched_count||0} matched</span><span class="badge ${(ch.issue_count||0)>0?'bc':'bp'}">${ch.issue_count||0} issue${ch.issue_count===1?'':'s'}</span>${stB}</div></div><div class="chap-body"><div class="chap-summary-line"><span><i class="ti ti-circle-check" style="color:#3B6D11"></i> ${ch.matched_count||0} match</span><span><i class="ti ti-alert-circle" style="color:#A32D2D"></i> ${ch.issue_count||0} need attention</span></div>${(ch.rows||[]).map(r=>renderCmpRow(r)).join('')}</div></div>`;
+  }).join('');
+}
+function renderCmpRow(r){
+  const cls={ok:'ok',diff:'diff',miss:'miss',warn:'warn'}[r.type]||'ok';
+  const lblB={ok:'<span class="badge bp" style="font-size:10px">Match</span>',diff:'<span class="badge bc" style="font-size:10px">'+(S._mode==='copy'?'Copy error':'Mismatch')+'</span>',miss:'<span class="badge bw" style="font-size:10px">Missing</span>',warn:'<span class="badge bw" style="font-size:10px">Review</span>'}[r.type]||'';
+  const outMiss=!r.output_text;
+  return `<div class="cmp-row ${cls}"><div class="cmp-label"><span class="cl-name">${esc(r.name||'')}</span>${lblB}</div><div class="cmp-pair"><div class="cmp-cell src ${r.type==='diff'?'hl':''}"><div class="cmp-cell-label">${esc(S._src)}</div>${esc(r.source_text||'')}</div><div class="cmp-cell ${S._ar?'ar':''} ${outMiss?'missing':''} ${r.type==='diff'?'hl':''}"><div class="cmp-cell-label" style="${S._ar?'direction:ltr;':''}">${esc(S._out)}</div>${outMiss?'— not present in output —':esc(r.output_text)}</div></div>${r.note?`<div class="cmp-note"><strong>${r.type==='diff'&&S._mode==='copy'?'Copy error':'Issue'}:</strong> ${esc(r.note)}</div>`:''}</div>`;
+}
+function applyFilter(f,btn){S.filter=f;document.querySelectorAll('#v-issues .pill').forEach(p=>p.classList.remove('on'));btn.classList.add('on');renderIssues(f==='all'?S.issues:S.issues.filter(i=>i.severity===f));}
+
+function renderIssues(issues){
+  const sm=S.summary||{};const el=document.getElementById('v-issues');if(!el)return;
+  el.innerHTML=`<div class="pills" style="margin-bottom:1rem"><button class="pill on" onclick="applyFilter('all',this)">All (${sm.total_issues||0})</button><button class="pill" onclick="applyFilter('critical',this)">Critical (${sm.critical||0})</button><button class="pill" onclick="applyFilter('warning',this)">Warning (${sm.warning||0})</button><button class="pill" onclick="applyFilter('info',this)">Info</button><button class="pill" onclick="applyFilter('pass',this)">Passed</button></div>`+(issues&&issues.length?issues.map(iss=>{
+    const so=S.signoffs[iss.id]||{};const isPas=iss.severity==='pass';const rc=so.pm?'rpm':so.ct?'rct':iss.severity;
+    const bdg={critical:'<span class="badge bc">Critical</span>',warning:'<span class="badge bw">Warning</span>',info:'<span class="badge bi">Note</span>',pass:'<span class="badge bp">Passed</span>'}[iss.severity]||'';
+    const ctB=so.ct?'<span class="badge bi" style="margin-left:5px"><i class="ti ti-check"></i> Content</span>':'';
+    const pmB=so.pm?'<span class="badge bp" style="margin-left:4px"><i class="ti ti-check"></i> PM</span>':'';
+    const pgRef=iss.page_ref?`<a href="${esc(iss.page_ref)}" target="_blank" style="font-size:11px;color:#185FA5;margin-left:5px"><i class="ti ti-external-link" style="font-size:11px"></i> ${esc(iss.page_ref.replace(/^https?:\/\//,'').substring(0,40))}</a>`:'';
+    return `<div class="ic ${rc}" id="ic-${esc(iss.id)}"><div class="itop"><div><div class="ititle">${esc(iss.title)}</div><div class="imeta">${esc(iss.id)} · ${esc(iss.category)}${iss.section_ref?' · '+esc(iss.section_ref):''}${pgRef}${ctB}${pmB}</div></div>${bdg}</div>${(iss.source_excerpt||iss.output_excerpt)?`<div class="epair"><div class="ex"><div class="exl">${esc(S._src)}</div>${esc(iss.source_excerpt||'—')}</div><div class="ex ${S._ar?'ar':''}"><div class="exl" style="direction:ltr">${esc(S._out)}</div>${esc(iss.output_excerpt||'—')}</div></div>`:''}<div class="ibody">${esc(iss.explanation)}</div>${iss.recommendation?`<div class="ibody" style="margin-top:5px"><strong>Fix:</strong> ${esc(iss.recommendation)}</div>`:''}${isPas?'':`<div class="so-area"><div class="so-row"><span class="so-lbl"><i class="ti ti-users"></i> Content team</span>${so.ct?`<div><div class="so-done"><i class="ti ti-circle-check"></i> ${esc(so.ctN)} · ${esc(so.ctT)}</div>${so.ctNt?`<div class="so-stamp">"${esc(so.ctNt)}"</div>`:''}</div>`:`<input class="so-inp" id="ct-n-${esc(iss.id)}" placeholder="Your name"><input class="so-inp" id="ct-nt-${esc(iss.id)}" placeholder="Resolution note" style="margin-left:6px"><button class="so-btn" style="margin-left:6px" onclick="signCT('${esc(iss.id)}')">Sign off</button>`}</div><div class="so-row" style="margin-top:4px"><span class="so-lbl"><i class="ti ti-briefcase"></i> Project manager</span>${so.pm?`<div class="so-done"><i class="ti ti-circle-check"></i> ${esc(so.pmN)} · ${esc(so.pmT)}</div>`:so.ct?`<input class="so-inp" id="pm-n-${esc(iss.id)}" placeholder="PM name"><button class="so-btn" style="margin-left:6px" onclick="signPM('${esc(iss.id)}')">Approve</button>`:`<span class="so-stamp">Awaiting content team sign-off</span>`}</div></div>`}</div>`;
+  }).join(''):'<div class="empty"><i class="ti ti-check"></i>No issues in this category</div>');
+}
+function signCT(id){const n=document.getElementById('ct-n-'+id)?.value.trim();if(!n){alert('Enter your name.');return;}const nt=document.getElementById('ct-nt-'+id)?.value.trim();if(!S.signoffs[id])S.signoffs[id]={};Object.assign(S.signoffs[id],{ct:true,ctN:n,ctNt:nt,ctT:now()});autoSave();refresh();}
+function signPM(id){const n=document.getElementById('pm-n-'+id)?.value.trim();if(!n){alert('Enter PM name.');return;}if(!S.signoffs[id])S.signoffs[id]={};Object.assign(S.signoffs[id],{pm:true,pmN:n,pmT:now()});autoSave();refresh();}
+function refresh(){renderPS();const f=S.filter==='all'?S.issues:S.issues.filter(i=>i.severity===S.filter);renderIssues(f);if(S.view==='signoff')renderSignoff();}
+
+function renderSignoff(){const el=document.getElementById('v-signoff');if(!el)return;const np=S.issues.filter(i=>i.severity!=='pass'),p=calcProg(),ct=allCT();el.innerHTML=`<div class="pm-gate"><h3>Sign-off dashboard</h3><p>Content team must resolve all issues before PM can give final approval. Every action is timestamped and saved to the shared team store.</p><div style="margin-bottom:1rem"><div class="ps-row"><span class="ps-lbl">Content team</span><div class="ps-track" style="height:8px"><div class="ps-fill" style="width:${p.pct}%;background:#378ADD"></div></div><span class="ps-pct">${p.ct}/${p.total}</span></div><div class="ps-row"><span class="ps-lbl">Project manager</span><div class="ps-track" style="height:8px"><div class="ps-fill" style="width:${S.pmOk?100:0}%;background:#639922"></div></div><span class="ps-pct">${S.pmOk?'Approved':'Pending'}</span></div></div>${S.pmOk?`<div class="so-done" style="font-size:14px"><i class="ti ti-circle-check" style="font-size:18px"></i> Final approval by ${esc(S.pmName)} · ${esc(S.pmTime)}</div>${S.pmNotes?`<div style="font-size:13px;color:var(--t2);margin-top:5px">"${esc(S.pmNotes)}"</div>`:''}`:`${!ct?`<div class="note" style="margin-bottom:12px"><i class="ti ti-lock"></i> ${p.total-p.ct} issue(s) still need content team sign-off.</div>`:''}<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px"><div style="flex:1;min-width:160px"><label class="lbl">PM name</label><input id="pm-approver" type="text" placeholder="Project manager name"></div><div style="flex:2;min-width:160px"><label class="lbl">Final notes</label><input id="pm-final-notes" type="text" placeholder="Optional notes..."></div></div><button class="pm-btn" onclick="pmApprove()" ${!ct?'disabled':''}>Give final approval</button>`}</div><div style="margin-top:1rem"><div class="lbl" style="margin-bottom:.5rem">All issues</div>${np.map(i=>{const so=S.signoffs[i.id]||{};return`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:.5px solid var(--b3)"><span class="badge ${i.severity==='critical'?'bc':i.severity==='warning'?'bw':'bi'}" style="min-width:60px;text-align:center">${i.severity}</span><div style="flex:1;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(i.title)}</div><span class="badge" style="font-size:10px;background:${so.ct?'#E6F1FB':'var(--bg2)'};color:${so.ct?'#185FA5':'var(--t3)'}">${so.ct?'CT ✓':'CT —'}</span><span class="badge" style="font-size:10px;background:${so.pm?'#EAF3DE':'var(--bg2)'};color:${so.pm?'#3B6D11':'var(--t3)'}">${so.pm?'PM ✓':'PM —'}</span></div>`;}).join('')}</div>`;}
+function pmApprove(){const n=document.getElementById('pm-approver')?.value.trim();if(!n){alert('Enter PM name.');return;}S.pmOk=true;S.pmName=n;S.pmNotes=document.getElementById('pm-final-notes')?.value.trim()||'';S.pmTime=now();autoSave();renderPS();renderSignoff();}
+
+async function renderRev(){const el=document.getElementById('v-review');if(!el)return;if(!S.issues.length){el.innerHTML='<div class="note"><i class="ti ti-info-circle"></i> Run a QA analysis first.</div>';return;}el.innerHTML=`<div style="margin-bottom:1rem;font-size:13px;color:var(--t2);line-height:1.6">Three perspectives on this QA report.</div><div id="rp-d" class="rev-panel"><h3><i class="ti ti-palette" style="font-size:16px"></i> Product designer <span class="role-tag">UX</span></h3><div class="spin-row"><div class="spin"></div> Reviewing...</div></div><div id="rp-q" class="rev-panel"><h3><i class="ti ti-checklist" style="font-size:16px"></i> QA specialist <span class="role-tag">Logic</span></h3><div class="spin-row"><div class="spin"></div> Reviewing...</div></div><div id="rp-p" class="rev-panel"><h3><i class="ti ti-briefcase" style="font-size:16px"></i> Project manager <span class="role-tag">Process</span></h3><div class="spin-row"><div class="spin"></div> Reviewing...</div></div>`;const ctx=`QA tool for Spark, a GCC creative firm. Handles cross-language and cross-format comparisons including live microsite fetching. Results: ${JSON.stringify({summary:S.summary,comparison:S._src+' → '+S._out,issues:S.issues.length})}`;[{id:'d',role:'Senior product designer',focus:'Critique the UX of this QA tool for a content reviewer under deadline pressure.'},{id:'q',role:'Senior QA specialist with Arabic document experience',focus:'Are the right checks run for each mode? What edge cases are missing?'},{id:'p',role:'Project manager at a creative firm',focus:'Does the sign-off workflow and audit trail support real client delivery?'}].forEach(async({id,role,focus})=>{try{const r=await fetch('/api/review',{method:'POST',headers:authHeaders({'Content-Type':'application/json'}),body:JSON.stringify({role,focus,context:ctx})});const d=await r.json();const p=document.getElementById('rp-'+id);if(p){const sr=p.querySelector('.spin-row');if(sr)sr.outerHTML=`<div class="rv-body">${esc(d.text||d.error||'No response')}</div>`;}}catch(e){const p=document.getElementById('rp-'+id);if(p){const sr=p.querySelector('.spin-row');if(sr)sr.outerHTML='<div class="rv-body" style="color:var(--t3)">Could not load.</div>';}}});}
+
+function renderTOC(toc){const el=document.getElementById('v-toc');if(!el)return;if(!toc||!toc.length){el.innerHTML='<div style="color:var(--t3);font-size:13px;padding:1rem">No TOC or page structure data found.</div>';return;}el.innerHTML=`<div class="legend"><div class="li"><div class="ldot" style="background:#639922"></div>Matched</div><div class="li"><div class="ldot" style="background:#E24B4A"></div>Mismatch</div><div class="li"><div class="ldot" style="background:#EF9F27"></div>Missing</div></div><div class="toc-hdr"><div class="toc-hc">${esc(S._src)}</div><div></div><div class="toc-hc ${S._ar?'ar':''}">${S._dtw?'Microsite page':esc(S._out)}</div></div>`+toc.map(e=>{const ind=e.level===2?'ind1':e.level===3?'ind2':'';const st=e.status==='match'?'match':['missing_output','missing_source'].includes(e.status)?'missing':'mismatch';const out=S._dtw?(e.page_url||e.output_entry||''):(e.output_entry||'');const conn={match:'↔',mismatch:'⚠',missing_output:'→',missing_source:'←',order_wrong:'↕'}[e.status]||'↔';return`<div class="toc-row-g ${ind}"><div class="tc">${esc(e.source_entry||'')}</div><div class="toc-conn">${conn}</div><div class="tc ${S._ar?'ar':''} ${st}">${esc(out||(e.status==='missing_output'?'— missing —':''))}</div></div>`;}).join('');}
+
+function renderSecs(secs){const el=document.getElementById('v-secs');if(!el)return;if(!secs||!secs.length){el.innerHTML='<div style="color:var(--t3);font-size:13px;padding:1rem">No section data.</div>';return;}el.innerHTML=secs.map(s=>`<div class="sec-card"><div class="itop"><div style="flex:1"><div class="ititle">${esc(s.section_id)} — ${esc(s.source_heading||'')}</div>${s.output_heading?`<div class="imeta" style="${S._ar?'direction:rtl;text-align:right;':''}font-size:13px;margin-top:3px">${esc(s.output_heading)}</div>`:''}${s.page_url?`<div class="imeta" style="margin-top:3px"><a href="${esc(s.page_url)}" target="_blank" style="color:#185FA5;font-size:11px"><i class="ti ti-external-link" style="font-size:11px"></i> ${esc(s.page_url.replace(/^https?:\/\//,'').substring(0,50))}</a></div>`:''}</div><span class="badge ${s.heading_status==='match'?'bp':'bc'}">${s.heading_status==='match'?'Heading ✓':'Heading ⚠'}</span></div><div style="display:flex;gap:12px;margin-top:10px;flex-wrap:wrap"><div style="font-size:12px;color:var(--t2)">Paragraphs source: <strong style="color:var(--t1)">${s.paragraph_count_source??'—'}</strong></div><div style="font-size:12px;color:var(--t2)">Paragraphs output: <strong style="color:${s.paragraph_status==='match'?'#3B6D11':'#A32D2D'}">${s.paragraph_count_output??'—'}</strong></div><span class="badge ${s.paragraph_status==='match'?'bp':'bw'}">${s.paragraph_status==='match'?'Match':'Differs'}</span></div>${s.subsections?.length?`<div style="margin-top:10px;border-top:.5px solid var(--b3);padding-top:8px"><div class="lbl" style="margin-bottom:5px">Sub-sections</div>${s.subsections.map(sub=>`<div style="display:flex;align-items:start;gap:8px;margin-bottom:5px"><span class="badge ${sub.status==='match'?'bp':sub.status==='missing'?'bc':'bw'}" style="font-size:10px">${sub.status}</span><div style="font-size:12px;color:var(--t2)">${esc(sub.source_heading||'')}${sub.output_heading?(' → <span'+(S._ar?' dir="rtl"':'')+'>'+esc(sub.output_heading)+'</span>'):''}</div></div>`).join('')}</div>`:''}</div>`).join('');}
+
+async function saveReport(){await autoSave(true);}
+async function autoSave(announce){
+  const name=document.getElementById('proj-name').value.trim();if(!name||!S.issues.length)return;
+  const id='r-'+name.replace(/[^a-zA-Z0-9\-_]/g,'-');
+  const data={name,issues:S.issues,toc:S.toc,secs:S.secs,chapters:S.chapters,summary:S.summary,signoffs:S.signoffs,pmOk:S.pmOk,pmName:S.pmName,pmNotes:S.pmNotes,pmTime:S.pmTime,_src:S._src,_out:S._out,_ar:S._ar,_dtw:S._dtw,_mode:S._mode,savedAt:now()};
+  try{await fetch('/api/reports/'+id,{method:'PUT',headers:authHeaders({'Content-Type':'application/json'}),body:JSON.stringify({name,data})});document.getElementById('sv-lbl').textContent=announce?'Saved to team':'Auto-saved';}catch(e){}
+}
+function showSaved(){document.getElementById('main-view').style.display='none';document.getElementById('saved-view').style.display='block';loadSavedList();}
+function showMain(){document.getElementById('main-view').style.display='block';document.getElementById('saved-view').style.display='none';}
+async function loadSavedList(){
+  const el=document.getElementById('saved-list');el.innerHTML='<div class="spin-row"><div class="spin"></div> Loading team reports...</div>';
+  try{const r=await fetch('/api/reports',{headers:authHeaders()});const items=await r.json();
+    if(!items.length){el.innerHTML='<div class="empty"><i class="ti ti-folder-off"></i>No team reports yet. Run an analysis and save it.</div>';return;}
+    el.innerHTML=items.map(d=>{const sm=d.summary||{},np=(d.issues||[]).filter(i=>i.severity!=='pass');const ctD=np.filter(i=>d.signoffs?.[i.id]?.ct).length;return`<div class="saved-item" onclick="loadReport('${esc(d.id)}')"><div style="flex:1;min-width:0"><div class="si-name">${esc(d.name)}</div><div class="si-meta">${esc(d.savedAt||d.updated_at||'')} · ${esc(d._src||'')} → ${esc(d._out||'')} · ${np.length} issues · CT ${ctD}/${np.length} · PM ${d.pmOk?'approved':'pending'}</div></div><div style="display:flex;gap:4px;flex-shrink:0">${sm.critical?`<span class="badge bc">${sm.critical} critical</span>`:''} ${d.pmOk?'<span class="badge bp">Approved</span>':''}</div><button class="del-btn" onclick="event.stopPropagation();delReport('${esc(d.id)}')"><i class="ti ti-trash"></i></button></div>`;}).join('');
+  }catch(e){el.innerHTML='<div class="empty">Could not load team reports.</div>';}
+}
+async function loadReport(id){try{const r=await fetch('/api/reports/'+id,{headers:authHeaders()});const d=await r.json();Object.assign(S,{issues:d.issues||[],toc:d.toc||[],secs:d.secs||[],chapters:d.chapters||[],summary:d.summary||{},signoffs:d.signoffs||{},pmOk:d.pmOk||false,pmName:d.pmName||'',pmNotes:d.pmNotes||'',pmTime:d.pmTime||'',_src:d._src||'',_out:d._out||'',_ar:d._ar||false,_dtw:d._dtw||false,_mode:d._mode||'copy',filter:'all',view:'chapters'});document.getElementById('proj-name').value=d.name||'';showMain();renderResults();}catch(e){alert('Could not load report.');}}
+async function delReport(id){if(!confirm('Delete this team report?'))return;try{await fetch('/api/reports/'+id,{method:'DELETE',headers:authHeaders()});loadSavedList();}catch(e){alert('Delete failed.');}}
+
+function doExport(){if(!S.issues.length&&!S.toc.length)return;const sm=S.summary||{},name=document.getElementById('proj-name').value.trim()||'Unnamed';const lines=['SPARK QA REPORT','='.repeat(50),'',`Project: ${name}`,`Comparison: ${S._src} → ${S._out}`,`Generated: ${now()}`,`Structure: ${sm.structure_score}/100  Content: ${sm.content_score}/100  Completeness: ${sm.completeness_score}/100`,''];if(S.pmOk)lines.push(`FINAL APPROVAL: ${S.pmName} · ${S.pmTime}${S.pmNotes?' — "'+S.pmNotes+'"':''}`,''  );if(S.toc.length){lines.push('STRUCTURE MAP','-'.repeat(30));S.toc.forEach(e=>lines.push(`[${e.status?.toUpperCase()}] L${e.level} | Source: ${e.source_entry||''} | Output: ${e.output_entry||e.page_url||'MISSING'}${e.note?' ('+e.note+')':''}`));lines.push('');}if(S.secs.length){lines.push('SECTIONS','-'.repeat(30));S.secs.forEach(s=>lines.push(`${s.section_id} | ${s.source_heading||''} → ${s.output_heading||'?'}${s.page_url?' ('+s.page_url+')':''} | Heading: ${s.heading_status} | Para src:${s.paragraph_count_source??'?'} out:${s.paragraph_count_output??'?'} | ${s.paragraph_status}`));lines.push('');}lines.push('ISSUES','-'.repeat(30));S.issues.forEach(i=>{const so=S.signoffs[i.id]||{};lines.push(`[${(i.severity||'').toUpperCase()}] ${i.id} — ${i.title}`);lines.push(`Category: ${i.category} | Section: ${i.section_ref||'—'}${i.page_ref?' | Page: '+i.page_ref:''}`);if(i.source_excerpt)lines.push(`Source: ${i.source_excerpt}`);if(i.output_excerpt)lines.push(`Output: ${i.output_excerpt}`);lines.push(`Issue: ${i.explanation}`);if(i.recommendation)lines.push(`Fix: ${i.recommendation}`);if(so.ct)lines.push(`Content: ${so.ctN} · ${so.ctT}${so.ctNt?' — "'+so.ctNt+'"':''}`);if(so.pm)lines.push(`PM: ${so.pmN} · ${so.pmT}`);lines.push('');});const blob=new Blob([lines.join('\n')],{type:'text/plain'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`spark-qa-${name.replace(/\s+/g,'-').toLowerCase()}.txt`;a.click();}
+
+function col(n){return n>=80?'grn':n>=60?'amber':'red';}
+function now(){return new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})+' '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+init();
+</script>
+</body>
+</html>

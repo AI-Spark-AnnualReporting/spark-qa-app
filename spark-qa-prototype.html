@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spark QA — Prototype</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+:root{--bg1:#fff;--bg2:#f5f5f4;--bg3:#eeede8;--t1:#1a1a1a;--t2:#555;--t3:#999;--b1:rgba(0,0,0,0.35);--b2:rgba(0,0,0,0.22);--b3:rgba(0,0,0,0.12);--r1:8px;--r2:12px;--f:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+@media(prefers-color-scheme:dark){:root{--bg1:#1c1c1a;--bg2:#252523;--bg3:#2e2e2b;--t1:#f0efeb;--t2:#aaa;--t3:#666;--b1:rgba(255,255,255,0.3);--b2:rgba(255,255,255,0.18);--b3:rgba(255,255,255,0.1)}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--f);background:var(--bg3);min-height:100vh;padding:2rem 1rem;color:var(--t1)}
+.wrap{max-width:840px;margin:0 auto;background:var(--bg1);border-radius:var(--r2);padding:2rem;border:.5px solid var(--b3)}
+h1{font-size:18px;font-weight:500}h2{font-size:15px;font-weight:500}
+.sub{font-size:13px;color:var(--t2);margin-top:3px}
+.hdr{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:1rem}
+.demo-tag{font-size:11px;padding:3px 10px;border-radius:20px;background:#E6F1FB;color:#185FA5;border:.5px solid #85B7EB}
+.demo-banner{font-size:12px;background:#FAEEDA;color:#854F0B;border:.5px solid #EF9F27;border-radius:var(--r1);padding:8px 12px;margin-bottom:1.25rem;display:flex;align-items:flex-start;gap:6px;line-height:1.5}
+.btn{font-size:12px;padding:6px 12px;border:.5px solid var(--b2);border-radius:var(--r1);background:none;cursor:pointer;color:var(--t2);font-family:var(--f);display:inline-flex;align-items:center;gap:5px}
+.btn:hover{color:var(--t1);border-color:var(--b1)}
+.run-btn{background:var(--t1);color:var(--bg1);border-color:var(--t1);font-size:14px;font-weight:500;padding:11px;width:100%;justify-content:center;margin-top:.5rem}
+.run-btn:hover{opacity:.88;color:var(--bg1)}
+.sdiv{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);border-top:.5px solid var(--b3);padding-top:1rem;margin:1.25rem 0 .75rem}
+.lbl{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--t3);display:block;margin-bottom:5px}
+input,textarea,select{width:100%;font-family:var(--f);font-size:13px;color:var(--t1);background:var(--bg1);border:.5px solid var(--b3);border-radius:var(--r1);padding:9px 11px}
+input:focus,select:focus{outline:none;border-color:var(--b1)}
+.field{margin-bottom:.9rem}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.slot{border:.5px solid var(--b3);border-radius:var(--r2);padding:1rem 1.25rem;background:var(--bg2)}
+.slot-title{font-size:13px;font-weight:500;margin-bottom:.75rem;display:flex;align-items:center;gap:7px}
+.uz{border:.5px dashed var(--b2);border-radius:var(--r1);padding:1.1rem 1rem;text-align:center;cursor:pointer;background:var(--bg1);margin-top:.5rem}
+.uz.got{border-style:solid;border-color:var(--b1)}
+.uz i{font-size:20px;color:var(--t1);display:block;margin-bottom:5px}
+.uz .un{font-size:12px;color:var(--t1);font-weight:500}
+.uz .us{font-size:11px;color:var(--t3);margin-top:2px}
+.cb-bar{display:flex;align-items:center;gap:10px;padding:.75rem 1rem;background:var(--bg2);border-radius:var(--r1);margin:.75rem 0;flex-wrap:wrap}
+.cb-pill{font-size:12px;padding:4px 12px;border-radius:20px;font-weight:500;white-space:nowrap}
+.cb-pill.copy{background:#E6F1FB;color:#185FA5;border:.5px solid #85B7EB}
+.cb-pill.trans{background:#EEEDFE;color:#3C3489;border:.5px solid #AFA9EC}
+.cb-mode{font-size:12px;color:var(--t3)}
+.chk-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:1rem}
+.chk{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--t2);cursor:pointer}
+.chk input{accent-color:var(--t1);width:14px;height:14px}
+.prog-wrap{margin:1rem 0}.prog-bar{background:var(--bg2);border-radius:4px;height:3px;overflow:hidden}
+.prog-fill{height:100%;background:var(--t1);border-radius:4px;transition:width .4s ease}
+.prog-lbl{font-size:12px;color:var(--t2);margin-top:6px;text-align:center}
+.mode-explain{font-size:12px;padding:8px 12px;border-radius:var(--r1);margin-bottom:1rem;display:flex;align-items:flex-start;gap:6px;line-height:1.5}
+.mode-explain.copy{background:#E6F1FB;color:#185FA5;border:.5px solid #85B7EB}
+.mode-explain.trans{background:#EEEDFE;color:#3C3489;border:.5px solid #AFA9EC}
+.score-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1.25rem}
+.sc{background:var(--bg2);border-radius:var(--r1);padding:12px;text-align:center}
+.sc-n{font-size:22px;font-weight:500}.sc-l{font-size:11px;color:var(--t2);margin-top:2px;text-transform:uppercase;letter-spacing:.04em}
+.red{color:#A32D2D}.amber{color:#854F0B}.grn{color:#3B6D11}
+.pills{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap}
+.pill{font-size:12px;padding:5px 13px;border:.5px solid var(--b3);border-radius:20px;cursor:pointer;color:var(--t2);background:none;font-family:var(--f)}
+.pill.on{background:var(--t1);color:var(--bg1);border-color:var(--t1)}
+.chap{border:.5px solid var(--b3);border-radius:var(--r2);margin-bottom:10px;background:var(--bg1);overflow:hidden}
+.chap-head{padding:.9rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer}
+.chap-head:hover{background:var(--bg2)}
+.chap-title{font-size:14px;font-weight:500;display:flex;align-items:center;gap:8px}
+.chev{font-size:16px;color:var(--t3);transition:transform .2s}
+.chap.open .chev{transform:rotate(90deg)}
+.chap-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.badge{font-size:11px;padding:3px 9px;border-radius:20px;white-space:nowrap;flex-shrink:0}
+.bc{background:#FCEBEB;color:#A32D2D}.bw{background:#FAEEDA;color:#854F0B}.bp{background:#EAF3DE;color:#3B6D11}.bi{background:#E6F1FB;color:#185FA5}
+.chap-body{display:none;border-top:.5px solid var(--b3);padding:1rem 1.25rem}
+.chap.open .chap-body{display:block}
+.chap-summary-line{font-size:12px;color:var(--t2);margin-bottom:1rem;display:flex;gap:14px;flex-wrap:wrap}
+.chap-summary-line span{display:flex;align-items:center;gap:4px}
+.cmp-row{margin-bottom:14px;border:.5px solid var(--b3);border-radius:var(--r1);overflow:hidden}
+.cmp-row.ok{border-left:3px solid #639922}.cmp-row.diff{border-left:3px solid #E24B4A}.cmp-row.miss{border-left:3px solid #EF9F27}.cmp-row.warn{border-left:3px solid #EF9F27}
+.cmp-label{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 12px;background:var(--bg2);font-size:12px}
+.cl-name{font-weight:500;color:var(--t1)}
+.cmp-pair{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.cmp-cell{padding:9px 12px;font-size:12px;line-height:1.6;color:var(--t2)}
+.cmp-cell.src{border-right:.5px solid var(--b3)}
+.cmp-cell.ar{direction:rtl;text-align:right;font-size:13px}
+.cmp-cell-label{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--t3);margin-bottom:4px}
+.cmp-cell.missing{background:#FAEEDA;color:#854F0B;font-style:italic}
+.cmp-cell.hl{background:#FCEBEB}
+.cmp-note{font-size:12px;color:var(--t2);padding:8px 12px;background:var(--bg2);border-top:.5px solid var(--b3);line-height:1.5}
+.cmp-note strong{color:var(--t1);font-weight:500}
+.diff-word{background:#F7C1C1;color:#791F1F;border-radius:3px;padding:0 2px}
+.so-area{margin-top:10px;border-top:.5px solid var(--b3);padding-top:10px}
+.so-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap}
+.so-lbl{font-size:12px;color:var(--t2);min-width:120px;display:flex;align-items:center;gap:5px;flex-shrink:0}
+.so-inp{font-size:12px;padding:5px 9px;border:.5px solid var(--b3);border-radius:var(--r1);background:var(--bg1);color:var(--t1);font-family:var(--f);width:auto;flex:1;min-width:80px}
+.so-btn{font-size:12px;padding:5px 11px;border:.5px solid var(--b2);border-radius:var(--r1);background:none;cursor:pointer;font-family:var(--f);color:var(--t2);white-space:nowrap;flex-shrink:0}
+.so-btn:hover{color:var(--t1)}
+.so-done{font-size:12px;color:#3B6D11;display:flex;align-items:center;gap:5px}
+.so-stamp{font-size:11px;color:var(--t3);margin-top:2px}
+.ps-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.ps-lbl{font-size:12px;color:var(--t2);min-width:130px}
+.ps-track{flex:1;height:6px;background:var(--b3);border-radius:3px;overflow:hidden}
+.ps-fill{height:100%;border-radius:3px;transition:width .4s ease}
+.ps-pct{font-size:12px;color:var(--t2);min-width:60px;text-align:right}
+.pm-gate{border:.5px solid var(--b3);border-radius:var(--r2);padding:1rem 1.25rem;margin-bottom:1rem;background:var(--bg2)}
+.pm-gate h3{font-size:14px;font-weight:500;margin-bottom:6px}
+.pm-gate p{font-size:13px;color:var(--t2);margin-bottom:12px;line-height:1.6}
+.pm-btn{padding:9px 18px;font-size:13px;font-weight:500;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r1);cursor:pointer;font-family:var(--f)}
+.pm-btn:disabled{opacity:.4;cursor:not-allowed}
+.note{font-size:12px;color:var(--t3);background:var(--bg2);border-radius:var(--r1);padding:8px 12px;display:flex;gap:6px;line-height:1.5}
+.toc-hdr{display:grid;grid-template-columns:1fr 24px 1fr;gap:6px;margin-bottom:8px}
+.toc-hc{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--t3);padding:0 10px}
+.toc-hc.ar{text-align:right;direction:rtl}
+.toc-row-g{display:grid;grid-template-columns:1fr 24px 1fr;gap:6px;align-items:start;margin-bottom:5px}
+.tc{border:.5px solid var(--b3);border-radius:var(--r1);padding:7px 10px;font-size:13px;background:var(--bg1);min-height:34px}
+.tc.ar{direction:rtl;text-align:right}
+.tc.match{border-color:#639922;background:#EAF3DE;color:#3B6D11}.tc.mismatch{border-color:#E24B4A;background:#FCEBEB;color:#A32D2D}.tc.missing{border-color:#EF9F27;background:#FAEEDA;color:#854F0B;font-style:italic}
+.toc-conn{display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--t3);padding-top:8px}
+.legend{display:flex;gap:12px;margin-bottom:.75rem;flex-wrap:wrap}
+.ldot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.li{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--t2)}
+@media(max-width:600px){.two{grid-template-columns:1fr}.score-row{grid-template-columns:1fr 1fr}.cmp-pair{grid-template-columns:1fr}.cmp-cell.src{border-right:none;border-bottom:.5px solid var(--b3)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="demo-banner"><i class="ti ti-flask"></i> This is a working prototype with built-in sample data so you and your team can test the full experience. The deployed version runs real AI analysis on your actual files. Click "Run QA analysis" to see a sample report.</div>
+
+<div class="hdr">
+  <div><h1>Spark content QA</h1><p class="sub">Bilingual structural and copy review — PDF, Word, website, microsite</p></div>
+  <span class="demo-tag"><i class="ti ti-flask"></i> Prototype</span>
+</div>
+
+<div id="setup">
+<div class="field"><label class="lbl">Project name</label><input type="text" id="proj" value="Bank Albilad Annual Report 2024"></div>
+<div class="sdiv" style="border:none;padding:0;margin-top:0">Comparison setup</div>
+<div class="two">
+  <div class="slot">
+    <div class="slot-title"><i class="ti ti-file-check" style="font-size:16px"></i> Source — trusted document</div>
+    <div class="field"><label class="lbl">Language</label><select id="sl" onchange="upd()"><option value="en">English</option><option value="ar">Arabic</option></select></div>
+    <div class="field"><label class="lbl">Format</label><select id="sf" onchange="upd()"><option value="word">Word (.docx)</option><option value="pdf">PDF</option><option value="paste">Pasted text</option></select></div>
+    <div class="uz got"><i class="ti ti-file-check"></i><div class="un">Bank-Albilad-2024-source.docx</div><div class="us">842 KB · ready (sample)</div></div>
+  </div>
+  <div class="slot">
+    <div class="slot-title"><i class="ti ti-file-search" style="font-size:16px"></i> Output — file to verify</div>
+    <div class="field"><label class="lbl">Language</label><select id="ol" onchange="upd()"><option value="en">English</option><option value="ar">Arabic</option></select></div>
+    <div class="field"><label class="lbl">Format</label><select id="of" onchange="upd()"><option value="pdf">PDF</option><option value="website">Website / microsite</option></select></div>
+    <div class="uz got"><i class="ti ti-file-check"></i><div class="un">Bank-Albilad-2024-final.pdf</div><div class="us">918 KB · ready (sample)</div></div>
+  </div>
+</div>
+<div class="cb-bar"><span class="cb-pill copy" id="cbp">EN Word → EN PDF</span><span class="cb-mode" id="cbm">Same-language copy-accuracy check</span></div>
+<div class="sdiv">Checks to run</div>
+<div class="chk-grid">
+  <label class="chk"><input type="checkbox" checked> Table of contents structure</label>
+  <label class="chk"><input type="checkbox" checked> Section and chapter headings</label>
+  <label class="chk"><input type="checkbox" checked> Sub-section hierarchy</label>
+  <label class="chk"><input type="checkbox" checked> Paragraph count and order</label>
+  <label class="chk"><input type="checkbox" checked> Content / copy accuracy</label>
+  <label class="chk"><input type="checkbox" checked> RTL direction and alignment</label>
+  <label class="chk"><input type="checkbox" checked> Missing sections or content</label>
+  <label class="chk"><input type="checkbox" checked> Placeholder text</label>
+  <label class="chk"><input type="checkbox" checked> Numbers and dates</label>
+  <label class="chk"><input type="checkbox" checked> Diacritics and letter forms</label>
+</div>
+<button class="btn run-btn" onclick="runDemo()"><i class="ti ti-scan"></i> Run QA analysis</button>
+<div id="prog" style="display:none" class="prog-wrap"><div class="prog-bar"><div class="prog-fill" id="pf" style="width:0%"></div></div><div class="prog-lbl" id="pl">Preparing...</div></div>
+</div>
+<div id="results"></div>
+</div>
+
+<script>
+const DATA={
+'en-en':{srcLabel:'English source (Word)',outLabel:'English PDF',ar:false,mode:'copy',scores:{structure:92,content:88,complete:95,critical:2},
+  toc:[{l:1,s:"Chairman's Statement",o:"Chairman's Statement",st:"match"},{l:1,s:"Financial Highlights",o:"Financial Highlights",st:"match"},{l:2,s:"Capital Adequacy",o:"— missing —",st:"missing_output"},{l:1,s:"Risk Management",o:"Risk Management",st:"match"}],
+  chapters:[
+    {id:'Ch 1',title:"Chairman's Statement",status:'diff',matched:5,issues:1,rows:[
+      {type:'ok',name:'Opening paragraph',src:'It is my privilege to present the annual report for the fiscal year 2024, a year of resilient growth.',out:'It is my privilege to present the annual report for the fiscal year 2024, a year of resilient growth.'},
+      {type:'diff',name:'Reporting date',src:'as of 31 December 2024',out:'as of 31 December 2023',diff:['2024','2023'],note:'Year mistyped during layout. Source says 2024, the PDF says 2023. A copy error introduced in design.'},
+      {type:'ok',name:'Closing remarks',src:'I extend my gratitude to our shareholders and the regulatory authorities.',out:'I extend my gratitude to our shareholders and the regulatory authorities.'}
+    ]},
+    {id:'Ch 3',title:'Financial Highlights',status:'diff',matched:4,issues:2,rows:[
+      {type:'ok',name:'Revenue Performance',src:'Revenue grew 14% year on year, driven by strong retail banking performance.',out:'Revenue grew 14% year on year, driven by strong retail banking performance.'},
+      {type:'diff',name:'Net profit figure',src:'net profit of SAR 2.47 billion',out:'net profit of SAR 2.74 billion',diff:['2.47','2.74'],note:'Digits transposed during layout. Source: 2.47 billion. PDF: 2.74 billion. Critical copy error in a financial figure.'},
+      {type:'miss',name:'Capital Adequacy paragraph',src:'The bank maintained a capital adequacy ratio of 19.2%, well above the regulatory minimum.',out:'',note:'This paragraph from the source Word document was dropped when the text was flowed into the PDF layout.'}
+    ]},
+    {id:'Ch 7',title:'Risk Management',status:'ok',matched:8,issues:0,rows:[
+      {type:'ok',name:'Credit Risk',src:'The credit risk framework was strengthened during the year.',out:'The credit risk framework was strengthened during the year.'},
+      {type:'ok',name:'Operational Risk',src:'Operational risk controls were reviewed and enhanced.',out:'Operational risk controls were reviewed and enhanced.'}
+    ]}
+  ]},
+'ar-ar':{srcLabel:'Arabic source (Word)',outLabel:'Arabic PDF',ar:true,mode:'copy',scores:{structure:90,content:85,complete:88,critical:2},
+  toc:[{l:1,s:'كلمة رئيس مجلس الإدارة',o:'كلمة رئيس مجلس الإدارة',st:'match'},{l:1,s:'أبرز المؤشرات المالية',o:'أبرز المؤشرات المالية',st:'match'},{l:2,s:'كفاية رأس المال',o:'— مفقود —',st:'missing_output'}],
+  chapters:[
+    {id:'Ch 1',title:'كلمة رئيس مجلس الإدارة (Chairman)',status:'diff',matched:4,issues:1,rows:[
+      {type:'ok',name:'Opening paragraph',src:'يشرفني أن أقدم التقرير السنوي للسنة المالية 2024.',out:'يشرفني أن أقدم التقرير السنوي للسنة المالية 2024.'},
+      {type:'diff',name:'Profit figure',src:'صافي ربح بقيمة 2.47 مليار ريال',out:'صافي ربح بقيمة 2.74 مليار ريال',diff:['2.47','2.74'],note:'Digits transposed during layout. Source says 2.47, the PDF says 2.74. Copy error in a financial figure.'}
+    ]},
+    {id:'Ch 3',title:'أبرز المؤشرات المالية (Financials)',status:'diff',matched:5,issues:1,rows:[
+      {type:'ok',name:'Revenue heading',src:'أداء الإيرادات',out:'أداء الإيرادات'},
+      {type:'miss',name:'Capital Adequacy paragraph',src:'حافظ البنك على نسبة كفاية رأس المال البالغة 19.2%.',out:'',note:'This paragraph from the source Word document is missing from the Arabic PDF. Likely dropped during layout.'}
+    ]},
+    {id:'Ch 7',title:'إدارة المخاطر (Risk)',status:'warn',matched:7,issues:1,rows:[
+      {type:'ok',name:'Credit Risk',src:'تم تعزيز إطار مخاطر الائتمان خلال العام.',out:'تم تعزيز إطار مخاطر الائتمان خلال العام.'},
+      {type:'warn',name:'Total assets (RTL)',src:'إجمالي الأصول: 142.8 مليار ريال',out:'142.8 مليار ريال :إجمالي الأصول',note:'Same text, but the number is rendering left-to-right in the PDF, breaking the RTL flow. A layout direction issue, not a copy error.'}
+    ]}
+  ]},
+'en-ar':{srcLabel:'English source',outLabel:'Arabic PDF',ar:true,mode:'trans',scores:{structure:78,content:84,complete:71,critical:3},
+  toc:[{l:1,s:"Chairman's Statement",o:'كلمة رئيس مجلس الإدارة',st:'match'},{l:1,s:'Financial Highlights',o:'أبرز المؤشرات المالية',st:'match'},{l:2,s:'Capital Adequacy',o:'— missing —',st:'missing_output'},{l:1,s:'Risk Management',o:'إدارة المخاطر',st:'mismatch'}],
+  chapters:[
+    {id:'Ch 3',title:'Financial Highlights',status:'diff',matched:4,issues:2,rows:[
+      {type:'ok',name:'Revenue Performance',src:'Revenue grew 14% year on year.',out:'نمت الإيرادات بنسبة 14% على أساس سنوي.'},
+      {type:'diff',name:'Net profit figure',src:'net profit of SAR 2.47 billion',out:'صافي ربح بقيمة 2.5 مليار ريال',note:'Translation rounds the figure to 2.5 billion. The English says 2.47 billion. Even in translation, figures must be exact.'},
+      {type:'miss',name:'Capital Adequacy sub-section',src:'The bank maintained a capital adequacy ratio of 19.2%.',out:'',note:'This sub-section was not translated into Arabic at all — a completeness gap in the translation.'}
+    ]},
+    {id:'Ch 7',title:'Risk Management',status:'warn',matched:6,issues:1,rows:[
+      {type:'ok',name:'Credit Risk',src:'The credit risk framework was strengthened.',out:'تم تعزيز إطار مخاطر الائتمان.'},
+      {type:'warn',name:'Liquidity Risk paragraphs',src:'(2 paragraphs on liquidity risk)',out:'(missing)',note:'Two paragraphs on liquidity risk in the English source have no Arabic translation present.'}
+    ]}
+  ]},
+'ar-web':{srcLabel:'Arabic source (PDF)',outLabel:'Arabic microsite',ar:true,mode:'copy',scores:{structure:81,content:86,complete:74,critical:2},
+  toc:[{l:1,s:'أبرز المؤشرات المالية',o:'أبرز المؤشرات المالية',st:'match'},{l:1,s:'الحوكمة',o:'الحوكمة',st:'match'}],
+  chapters:[
+    {id:'Ch 3',title:'أبرز المؤشرات المالية (Financials)',status:'diff',matched:3,issues:2,rows:[
+      {type:'ok',name:'Revenue heading',src:'أداء الإيرادات',out:'أداء الإيرادات'},
+      {type:'diff',name:'Profit figure',src:'صافي ربح بقيمة 2.47 مليار ريال',out:'صافي ربح بقيمة 2.5 مليار ريال',diff:['2.47','2.5'],note:'The microsite rounds to 2.5 billion. The source PDF says 2.47. The microsite must match the source exactly.'},
+      {type:'miss',name:'Capital Adequacy paragraph',src:'حافظ البنك على نسبة كفاية رأس المال البالغة 19.2%.',out:'',note:'This paragraph from the source PDF does not appear on the microsite financials page.'}
+    ]},
+    {id:'Ch 5',title:'الحوكمة (Governance)',status:'warn',matched:5,issues:1,rows:[
+      {type:'ok',name:'Board composition',src:'يتكون مجلس الإدارة من تسعة أعضاء.',out:'يتكون مجلس الإدارة من تسعة أعضاء.'},
+      {type:'warn',name:'Committee order',src:'(4 committees in order)',out:'(same 4, reordered)',note:'The microsite lists the same committees in a different order than the source PDF.'}
+    ]}
+  ]}
+};
+
+const ST={pair:'en-en',signoffs:{},pmOk:false,pmName:'',pmTime:'',view:'chapters'};
+
+function upd(){
+  const sl=document.getElementById('sl').value,ol=document.getElementById('ol').value,sf=document.getElementById('sf').value,of=document.getElementById('of').value;
+  let pair;
+  if(sl==='en'&&ol==='en')pair='en-en';
+  else if(sl==='ar'&&ol==='ar'&&of==='website')pair='ar-web';
+  else if(sl==='ar'&&ol==='ar')pair='ar-ar';
+  else if(sl==='en'&&ol==='ar')pair='en-ar';
+  else pair='en-en';
+  ST.pair=pair;
+  const ll={en:'EN',ar:'AR'},fl={pdf:'PDF',word:'Word',paste:'Text',website:'Website'};
+  const isCopy=sl===ol;
+  document.getElementById('cbp').textContent=`${ll[sl]} ${fl[sf]} → ${ll[ol]} ${fl[of]}`;
+  document.getElementById('cbp').className='cb-pill '+(isCopy?'copy':'trans');
+  document.getElementById('cbm').textContent=isCopy?'Same-language copy-accuracy check — content must match exactly':'Cross-language translation check — fidelity and completeness';
+}
+
+function runDemo(){
+  document.getElementById('prog').style.display='block';
+  const steps=[[15,'Reading source document...'],[40,'Reading output...'],[65,'Comparing content against structure...'],[85,'Building report...'],[100,'Complete']];
+  let i=0;const tick=()=>{if(i>=steps.length){setTimeout(()=>{document.getElementById('prog').style.display='none';render();},300);return;}document.getElementById('pf').style.width=steps[i][0]+'%';document.getElementById('pl').textContent=steps[i][1];i++;setTimeout(tick,500);};tick();
+}
+
+function render(){
+  const d=DATA[ST.pair];const sm=d.scores;
+  document.getElementById('results').innerHTML=`<div style="margin-top:1.5rem">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;gap:8px;flex-wrap:wrap"><div><h2>QA report</h2><div style="font-size:12px;color:var(--t3);margin-top:2px">${esc(d.srcLabel)} → ${esc(d.outLabel)}</div></div><button class="btn" onclick="alert('In the deployed version this exports the full report with the audit trail.')"><i class="ti ti-download"></i> Export</button></div>
+    <div class="mode-explain ${d.mode}">${d.mode==='copy'?'<i class="ti ti-equal"></i> <span><strong>Copy-accuracy mode.</strong> Source and output are the same language, so content must match word-for-word. Any difference is flagged as an error introduced during layout or build.</span>':'<i class="ti ti-language"></i> <span><strong>Translation mode.</strong> Different languages, so the check is translation fidelity and completeness.</span>'}</div>
+    <div class="score-row">
+      <div class="sc"><div class="sc-n ${col(sm.structure)}">${sm.structure}</div><div class="sc-l">Structure</div></div>
+      <div class="sc"><div class="sc-n ${col(sm.content)}">${sm.content}</div><div class="sc-l">${d.mode==='copy'?'Copy match':'Content'}</div></div>
+      <div class="sc"><div class="sc-n ${col(sm.complete)}">${sm.complete}</div><div class="sc-l">Completeness</div></div>
+      <div class="sc"><div class="sc-n red">${sm.critical}</div><div class="sc-l">Critical</div></div>
+    </div>
+    <div id="ps"></div>
+    <div class="pills">
+      <button class="pill on" id="pv-chapters" onclick="sv('chapters',this)"><i class="ti ti-layout-list"></i> Chapter content</button>
+      <button class="pill" id="pv-toc" onclick="sv('toc',this)"><i class="ti ti-list"></i> TOC map</button>
+      <button class="pill" id="pv-signoff" onclick="sv('signoff',this)"><i class="ti ti-writing"></i> Sign-off</button>
+    </div>
+    <div id="v-chapters"></div><div id="v-toc" style="display:none"></div><div id="v-signoff" style="display:none"></div>
+  </div>`;
+  renderPS();renderChapters();renderTOC();renderSignoff();
+  document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function renderPS(){const p=prog();const el=document.getElementById('ps');if(!el)return;el.innerHTML=`<div style="background:var(--bg2);border-radius:var(--r2);padding:1rem 1.25rem;margin-bottom:1.25rem"><div style="font-size:12px;font-weight:500;margin-bottom:10px">Sign-off progress</div><div class="ps-row"><span class="ps-lbl">Content team</span><div class="ps-track"><div class="ps-fill" style="width:${p.pct}%;background:#378ADD"></div></div><span class="ps-pct">${p.ct}/${p.total}</span></div><div class="ps-row" style="margin-bottom:0"><span class="ps-lbl">Project manager</span><div class="ps-track"><div class="ps-fill" style="width:${ST.pmOk?100:0}%;background:#639922"></div></div><span class="ps-pct">${ST.pmOk?'Approved':'Pending'}</span></div></div>`;}
+
+function allIssues(){return DATA[ST.pair].chapters.flatMap(ch=>ch.rows.filter(r=>r.type!=='ok').map(r=>({...r,chap:ch.id})));}
+function prog(){const n=allIssues();const t=n.length;const c=n.filter(r=>ST.signoffs[r.chap+r.name]?.ct).length;return{ct:c,total:t,pct:t?Math.round(c/t*100):0};}
+function allCT(){const n=allIssues();return n.length>0&&n.every(r=>ST.signoffs[r.chap+r.name]?.ct);}
+
+function sv(v,btn){ST.view=v;['chapters','toc','signoff'].forEach(id=>{const el=document.getElementById('v-'+id);if(el)el.style.display=id===v?'block':'none';const pb=document.getElementById('pv-'+id);if(pb)pb.classList.toggle('on',id===v);});if(v==='signoff')renderSignoff();}
+
+function renderChapters(){
+  const d=DATA[ST.pair];const el=document.getElementById('v-chapters');if(!el)return;
+  el.innerHTML=`<div style="font-size:13px;color:var(--t2);margin-bottom:1rem;line-height:1.6">Each chapter expands to show its content compared element by element against the source. Click a chapter to open it. ${d.mode==='copy'?'Differences are copy errors that must be corrected to match the source.':'Differences are translation issues.'}</div>`+d.chapters.map((ch,ci)=>{
+    const stB={diff:'<span class="badge bc">Content issues</span>',warn:'<span class="badge bw">Needs review</span>',ok:'<span class="badge bp">Clean</span>'}[ch.status];
+    return `<div class="chap${ci===0?' open':''}" id="chap-${ci}">
+      <div class="chap-head" onclick="document.getElementById('chap-${ci}').classList.toggle('open')">
+        <div class="chap-title"><i class="ti ti-chevron-right chev"></i> ${esc(ch.id)} — ${esc(ch.title)}</div>
+        <div class="chap-meta"><span class="badge bi">${ch.matched} matched</span><span class="badge ${ch.issues>0?'bc':'bp'}">${ch.issues} issue${ch.issues===1?'':'s'}</span>${stB}</div>
+      </div>
+      <div class="chap-body">
+        <div class="chap-summary-line"><span><i class="ti ti-circle-check" style="color:#3B6D11"></i> ${ch.matched} elements match</span><span><i class="ti ti-alert-circle" style="color:#A32D2D"></i> ${ch.issues} need attention</span></div>
+        ${ch.rows.map(r=>renderRow(r,d,ch.id)).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function hl(text,diff){if(!diff)return esc(text);let o=esc(text);diff.forEach(w=>{o=o.replace(esc(w),'<span class="diff-word">'+esc(w)+'</span>');});return o;}
+
+function renderRow(r,d,chapId){
+  const cls={ok:'ok',diff:'diff',miss:'miss',warn:'warn'}[r.type];
+  const lblB={ok:'<span class="badge bp" style="font-size:10px">Match</span>',diff:'<span class="badge bc" style="font-size:10px">'+(d.mode==='copy'?'Copy error':'Mismatch')+'</span>',miss:'<span class="badge bw" style="font-size:10px">Missing</span>',warn:'<span class="badge bw" style="font-size:10px">Review</span>'}[r.type];
+  const outMiss=r.out==='';
+  const so=ST.signoffs[chapId+r.name]||{};
+  const showSo=r.type!=='ok';
+  return `<div class="cmp-row ${cls}">
+    <div class="cmp-label"><span class="cl-name">${esc(r.name)}</span>${lblB}</div>
+    <div class="cmp-pair">
+      <div class="cmp-cell src ${r.type==='diff'?'hl':''}"><div class="cmp-cell-label">${esc(d.srcLabel)}</div>${r.type==='diff'?hl(r.src,r.diff):esc(r.src)}</div>
+      <div class="cmp-cell ${d.ar?'ar':''} ${outMiss?'missing':''} ${r.type==='diff'?'hl':''}"><div class="cmp-cell-label" style="${d.ar?'direction:ltr;':''}">${esc(d.outLabel)}</div>${outMiss?'— not present in output —':(r.type==='diff'?hl(r.out,r.diff):esc(r.out))}</div>
+    </div>
+    ${r.note?`<div class="cmp-note"><strong>${r.type==='diff'&&d.mode==='copy'?'Copy error':'Issue'}:</strong> ${esc(r.note)}</div>`:''}
+    ${showSo?`<div class="so-area" style="padding:8px 12px;margin-top:0">
+      <div class="so-row"><span class="so-lbl"><i class="ti ti-users"></i> Content team</span>${so.ct?`<div class="so-done"><i class="ti ti-circle-check"></i> ${esc(so.ctN)} · ${esc(so.ctT)}</div>`:`<input class="so-inp" id="ct-${esc(chapId+r.name)}" placeholder="Your name" value="Layla"><button class="so-btn" style="margin-left:6px" onclick="sCT('${esc(chapId+r.name)}')">Sign off</button>`}</div>
+      <div class="so-row" style="margin-top:4px"><span class="so-lbl"><i class="ti ti-briefcase"></i> Project manager</span>${so.pm?`<div class="so-done"><i class="ti ti-circle-check"></i> ${esc(so.pmN)} · ${esc(so.pmT)}</div>`:so.ct?`<input class="so-inp" id="pm-${esc(chapId+r.name)}" placeholder="PM name" value="Aamir"><button class="so-btn" style="margin-left:6px" onclick="sPM('${esc(chapId+r.name)}')">Approve</button>`:`<span class="so-stamp">Awaiting content team sign-off</span>`}</div>
+    </div>`:''}
+  </div>`;
+}
+
+function sCT(k){const n=document.getElementById('ct-'+k)?.value.trim()||'Layla';if(!ST.signoffs[k])ST.signoffs[k]={};Object.assign(ST.signoffs[k],{ct:true,ctN:n,ctT:nowStr()});refresh();}
+function sPM(k){const n=document.getElementById('pm-'+k)?.value.trim()||'Aamir';if(!ST.signoffs[k])ST.signoffs[k]={};Object.assign(ST.signoffs[k],{pm:true,pmN:n,pmT:nowStr()});refresh();}
+function refresh(){renderPS();renderChapters();if(ST.view==='signoff')renderSignoff();const v=ST.view;['chapters','toc','signoff'].forEach(id=>{const el=document.getElementById('v-'+id);if(el)el.style.display=id===v?'block':'none';});}
+
+function renderTOC(){const d=DATA[ST.pair];const el=document.getElementById('v-toc');if(!el)return;el.innerHTML=`<div class="legend"><div class="li"><div class="ldot" style="background:#639922"></div>Matched</div><div class="li"><div class="ldot" style="background:#E24B4A"></div>Mismatch</div><div class="li"><div class="ldot" style="background:#EF9F27"></div>Missing</div></div><div class="toc-hdr"><div class="toc-hc">${esc(d.srcLabel)}</div><div></div><div class="toc-hc ${d.ar?'ar':''}">${esc(d.outLabel)}</div></div>`+d.toc.map(e=>{const ind=e.l===2?'margin-left:14px':'';const st=e.st==='match'?'match':e.st==='missing_output'?'missing':'mismatch';const conn={match:'↔',mismatch:'⚠',missing_output:'→'}[e.st]||'↔';return`<div class="toc-row-g"><div class="tc" style="${ind}">${esc(e.s)}</div><div class="toc-conn">${conn}</div><div class="tc ${d.ar?'ar':''} ${st}">${esc(e.o)}</div></div>`;}).join('');}
+
+function renderSignoff(){const el=document.getElementById('v-signoff');if(!el)return;const n=allIssues();const p=prog();const ct=allCT();el.innerHTML=`<div class="pm-gate"><h3>Sign-off dashboard</h3><p>Content team resolves each flagged item, then the PM gives final approval. PM approval unlocks only when all items are signed off. Try signing off items in the Chapter content tab.</p><div style="margin-bottom:1rem"><div class="ps-row"><span class="ps-lbl">Content team</span><div class="ps-track" style="height:8px"><div class="ps-fill" style="width:${p.pct}%;background:#378ADD"></div></div><span class="ps-pct">${p.ct}/${p.total}</span></div><div class="ps-row"><span class="ps-lbl">Project manager</span><div class="ps-track" style="height:8px"><div class="ps-fill" style="width:${ST.pmOk?100:0}%;background:#639922"></div></div><span class="ps-pct">${ST.pmOk?'Approved':'Pending'}</span></div></div>${ST.pmOk?`<div class="so-done" style="font-size:14px"><i class="ti ti-circle-check" style="font-size:18px"></i> Final approval by ${esc(ST.pmName)} · ${esc(ST.pmTime)}</div>`:`${!ct?`<div class="note" style="margin-bottom:12px"><i class="ti ti-lock"></i> ${p.total-p.ct} item(s) still need content team sign-off before PM approval unlocks.</div>`:''}<div style="margin-bottom:12px"><label class="lbl">PM name</label><input id="pma" type="text" value="Aamir" style="max-width:240px"></div><button class="pm-btn" onclick="pmApp()" ${!ct?'disabled':''}>Give final approval</button>`}</div><div style="margin-top:1rem"><div class="lbl" style="margin-bottom:.5rem">All flagged items</div>${n.map(r=>{const so=ST.signoffs[r.chap+r.name]||{};return`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:.5px solid var(--b3)"><span class="badge ${r.type==='diff'?'bc':'bw'}" style="min-width:60px;text-align:center">${r.type==='miss'?'missing':r.type==='diff'?'error':'review'}</span><div style="flex:1;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.chap)} · ${esc(r.name)}</div><span class="badge" style="font-size:10px;background:${so.ct?'#E6F1FB':'var(--bg2)'};color:${so.ct?'#185FA5':'var(--t3)'}">${so.ct?'CT ✓':'CT —'}</span><span class="badge" style="font-size:10px;background:${so.pm?'#EAF3DE':'var(--bg2)'};color:${so.pm?'#3B6D11':'var(--t3)'}">${so.pm?'PM ✓':'PM —'}</span></div>`;}).join('')}</div>`;}
+
+function pmApp(){const n=document.getElementById('pma')?.value.trim()||'Aamir';ST.pmOk=true;ST.pmName=n;ST.pmTime=nowStr();renderPS();renderSignoff();}
+
+function col(n){return n>=80?'grn':n>=60?'amber':'red';}
+function nowStr(){return new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short'})+' '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+upd();
+</script>
+</body>
+</html>
