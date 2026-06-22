@@ -322,6 +322,15 @@ async function runQA(){
   if(sf==='paste'&&!document.getElementById('src-paste').value.trim()){alert('Paste source text.');return;}
   if(of==='pdf'&&!outFile){alert('Upload the output PDF first.');return;}
 
+  // The hosted (Vercel) site rejects request bodies over ~4.5 MB at the edge,
+  // before they ever reach the server — so we check here and explain it clearly.
+  const VERCEL_LIMIT=4.5*1024*1024;
+  const totalBytes=(srcFile?srcFile.size:0)+(outFile?outFile.size:0);
+  if(location.hostname!=='localhost'&&location.hostname!=='127.0.0.1'&&totalBytes>VERCEL_LIMIT){
+    alert(`File too large for the live site\n\nYour upload is ${(totalBytes/1024/1024).toFixed(1)} MB, but the hosted version accepts a maximum of 4.5 MB per upload (a limit set by Vercel, not this tool).\n\nWhat you can do:\n• Compress or split the PDF so the total is under 4.5 MB, or\n• Run the QA tool locally, where the limit is 30 MB.`);
+    return;
+  }
+
   const btn=document.getElementById('run-btn');btn.disabled=true;
   S.signoffs={};S.pmOk=false;
   document.getElementById('prog-wrap').style.display='block';document.getElementById('results').innerHTML='';
@@ -346,7 +355,11 @@ async function runQA(){
   try{
     const resp=await fetch('/api/qa',{method:'POST',headers:authHeaders(),body:fd});
     setP(80,'Processing results...');
-    const result=await resp.json();
+    if(resp.status===413){throw new Error('Upload too large for the live site. The hosted version accepts at most 4.5 MB per upload (a Vercel platform limit). Compress or split the files, or run the tool locally where the limit is 30 MB.');}
+    const ct=resp.headers.get('content-type')||'';
+    let result;
+    if(ct.includes('application/json')){result=await resp.json();}
+    else{const t=await resp.text();throw new Error(resp.ok?('Unexpected server response: '+t.slice(0,300)):('Server error '+resp.status+': '+t.slice(0,300)));}
     if(result.error)throw new Error(result.error+(result.raw?' — '+result.raw:''));
     S.issues=result.issues||[];S.toc=result.toc_comparison||[];S.secs=result.section_analysis||[];S.chapters=result.chapter_content||[];S.summary=result.summary||{};S._meta=result._meta||{};
     S._src=S._meta.srcDesc||'';S._out=S._meta.outDesc||'';S._ar=S._meta.isAR||false;S._dtw=S._meta.isDTW||false;S._mode=S._meta.compareMode||'copy';
