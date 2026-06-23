@@ -327,7 +327,9 @@ async function runQA(){
   const VERCEL_LIMIT=4.5*1024*1024;
   const totalBytes=(srcFile?srcFile.size:0)+(outFile?outFile.size:0);
   if(location.hostname!=='localhost'&&location.hostname!=='127.0.0.1'&&totalBytes>VERCEL_LIMIT){
-    alert(`File too large for the live site\n\nYour upload is ${(totalBytes/1024/1024).toFixed(1)} MB, but the hosted version accepts a maximum of 4.5 MB per upload (a limit set by Vercel, not this tool).\n\nWhat you can do:\n• Compress or split the PDF so the total is under 4.5 MB, or\n• Run the QA tool locally, where the limit is 30 MB.`);
+    const srcMB=srcFile?(srcFile.size/1024/1024).toFixed(1):'0';
+    const outMB=outFile?(outFile.size/1024/1024).toFixed(1):'0';
+    alert(`Files too large for the live site\n\nThe limit is on the COMBINED size of both files, not each one separately.\n\nSource: ${srcMB} MB + Output: ${outMB} MB = ${(totalBytes/1024/1024).toFixed(1)} MB total\n\nThe hosted version accepts a maximum of 4.5 MB combined per upload (a limit set by Vercel, not this tool).\n\nWhat you can do:\n• Compress or split the files so their TOTAL is under 4.5 MB, or\n• Run the QA tool locally, where the limit is 30 MB.`);
     return;
   }
 
